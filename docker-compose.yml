@@ -32,6 +32,21 @@ services:
     networks:
       - monitoring
 
+  screeps-agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: screeps-agent
+    restart: unless-stopped
+    environment:
+      - SCREEPS_TOKEN=3ffb99b6-ecb0-45a3-9923-5945f0f17be5
+      - VICTORIA_METRICS_URL=http://victoriametrics:8428
+      - NODE_ENV=production
+    depends_on:
+      - victoriametrics
+    networks:
+      - monitoring
+
 networks:
   monitoring:
     driver: bridge

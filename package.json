@@ -1,0 +1,25 @@
+{
+  "name": "screeps-monitoring-agent",
+  "version": "1.0.0",
+  "description": "Screeps memory segment monitoring agent that pushes metrics to VictoriaMetrics",
+  "main": "screeps-agent.js",
+  "scripts": {
+    "start": "node agent.js"
+  },
+  "keywords": [
+    "screeps",
+    "monitoring",
+    "victoriametrics",
+    "metrics",
+    "agent"
+  ],
+  "author": "Screeps Monitoring Team",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.5.0",
+    "node-cron": "^3.0.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

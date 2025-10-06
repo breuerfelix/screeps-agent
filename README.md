@@ -1,6 +1,64 @@
-# Screeps Agent - Grafana & Victoria Metrics Setup
+# Screeps Monitoring Agent
 
-This repository contains a Screeps agent that fetches stats from Screeps, converts them to metrics, and ingests them into Victoria Metrics for building dashboards in Grafana.
+This Node.js agent fetches memory segments from the Screeps API and pushes metrics to VictoriaMetrics for monitoring and visualization in Grafana.
+
+## Features
+
+- Fetches memory segments from all Screeps shards (shard0, shard1, shard2, shard3)
+- Parses JSON data from memory segments and extracts metrics
+- Pushes metrics to VictoriaMetrics in proper time-series format
+- Runs continuously with 3-minute intervals using cron scheduling
+- Handles different types of data: stats, rooms, market, military, economy
+- Dockerized for easy deployment
+- Built with Node.js 18+ for optimal performance
+
+## Quick Start
+
+1. **Configure your Screeps token**:
+
+   - Update the `SCREEPS_TOKEN` in `docker-compose.yml` with your actual Screeps API token
+   - Get your token from: https://screeps.com/a/#!/account/auth-tokens
+
+2. **Start the monitoring stack**:
+
+   ```bash
+   docker-compose up -d
+   ```
+
+3. **Access Grafana**:
+
+   - URL: http://localhost:3000
+   - Username: admin
+   - Password: jamo
+
+4. **VictoriaMetrics**:
+   - API: http://localhost:8428
+   - Query interface: http://localhost:8428/vmui
+
+## Development & Testing
+
+### Local Development
+
+```bash
+# Install dependencies
+npm install
+
+# Run the agent locally
+npm start
+
+# Run in test mode (single execution)
+TEST_MODE=true npm start
+
+# Run tests
+npm test
+```
+
+### Testing with Sample Data
+
+```bash
+# Run the test script to verify the agent works with sample data
+node test-agent.js
+```
 
 ## Quick Start
 
