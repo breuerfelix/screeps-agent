@@ -109,13 +109,13 @@ dashboard.new(
     // Configure the Y-axes
     yaxes: [
       {
-        format: 'none',
+        format: 'ms',
         label: 'CPU',
         show: true,
-        decimals: 2,
+        decimals: 0,
       },
       {
-        format: 'none',
+        format: 'short',
         label: 'Bucket',
         show: true,
         decimals: 0,
