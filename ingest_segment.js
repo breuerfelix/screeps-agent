@@ -29,40 +29,114 @@ function extractMetrics(segmentData, shard) {
       ) {
         // Check if this looks like a special case that needs labels
         if (isColonyData(baseName, key)) {
-          // Colony data - add colony as label
-          extractRecursive(value, `screeps_colony`, {
-            ...baseLabels,
-            colony: key,
+          // Colony data - iterate over each colony and add room name as label
+          Object.entries(value).forEach(([roomName, colonyData]) => {
+            extractRecursive(colonyData, `screeps_room`, {
+              ...baseLabels,
+              room: roomName,
+            });
           });
         } else if (isResourceData(baseName, key, value)) {
           // Resource data - add resource as label
-          Object.entries(value).forEach(([resource, amount]) => {
-            if (typeof amount === "number") {
-              metrics.push({
-                metric: { __name__: baseName, ...baseLabels, resource },
-                value: amount,
-                timestamp,
-              });
-            } else if (typeof amount === "object" && amount !== null) {
-              // Handle nested resource data (like trader.bought.resource.amount)
-              extractRecursive(amount, baseName, { ...baseLabels, resource });
-            }
-          });
+          // Use baseName_key as the metric name (e.g., screeps_room_assets)
+          const metricName = `${baseName}_${key}`;
+
+          // Check if this is sendCosts pattern (room -> amount) instead of (resource -> ...)
+          const allKeysAreRooms = Object.keys(value).every((k) =>
+            isRoomName(k),
+          );
+
+          if (allKeysAreRooms) {
+            // sendCosts pattern: room -> amount
+            Object.entries(value).forEach(([room, amount]) => {
+              if (typeof amount === "number") {
+                metrics.push({
+                  metric: { __name__: metricName, ...baseLabels, room },
+                  value: amount,
+                  timestamp,
+                });
+              }
+            });
+          } else {
+            // Standard resource pattern
+            Object.entries(value).forEach(([resource, amount]) => {
+              if (typeof amount === "number") {
+                metrics.push({
+                  metric: { __name__: metricName, ...baseLabels, resource },
+                  value: amount,
+                  timestamp,
+                });
+              } else if (typeof amount === "object" && amount !== null) {
+                // Check if nested data contains room names (for incomingResources/outgoingResources pattern)
+                const hasRoomKeys = Object.keys(amount).some((k) =>
+                  isRoomName(k),
+                );
+                if (hasRoomKeys) {
+                  // Resource -> Room -> Amount pattern
+                  Object.entries(amount).forEach(([room, roomAmount]) => {
+                    if (typeof roomAmount === "number") {
+                      metrics.push({
+                        metric: {
+                          __name__: metricName,
+                          ...baseLabels,
+                          resource,
+                          room,
+                        },
+                        value: roomAmount,
+                        timestamp,
+                      });
+                    }
+                  });
+                } else {
+                  // Handle other nested resource data (like trader.bought.resource.amount)
+                  extractRecursive(amount, metricName, {
+                    ...baseLabels,
+                    resource,
+                  });
+                }
+              }
+            });
+          }
         } else if (isRoomData(baseName, key)) {
           // Room-specific data - add room as label
+          // This handles cases like terminalNetwork.incomingResources.E8N26
           extractRecursive(value, baseName, { ...baseLabels, room: key });
         } else if (isRoleData(baseName, key, value)) {
           // Creep role data - add role as label
           extractRecursive(value, baseName, { ...baseLabels, role: key });
-        } else if (isUsageTypeData(baseName, key, value)) {
-          // Usage type data - add usage_type as label
-          extractRecursive(value, baseName, { ...baseLabels, usage_type: key });
-        } else if (isPhaseData(baseName, key, value)) {
-          // Phase data - add phase as label
-          extractRecursive(value, baseName, { ...baseLabels, phase: key });
         } else {
-          // Regular nested object - continue with concatenated name
-          extractRecursive(value, `${baseName}_${key}`, baseLabels);
+          // Check if this is a labeled data pattern (returns label name if true)
+          const labelInfo = getLabeledDataPattern(baseName, key, value);
+          if (labelInfo) {
+            // Emit child values with the specified label
+            // Use baseName_key as the metric name (e.g., screeps_colony_energyUsage)
+            const metricName = `${baseName}_${key}`;
+            Object.entries(value).forEach(([childKey, childValue]) => {
+              if (typeof childValue === "number") {
+                metrics.push({
+                  metric: {
+                    __name__: metricName,
+                    ...baseLabels,
+                    [labelInfo.labelName]: childKey,
+                  },
+                  value: childValue,
+                  timestamp,
+                });
+              } else if (
+                typeof childValue === "object" &&
+                childValue !== null
+              ) {
+                // Handle nested labeled data
+                extractRecursive(childValue, metricName, {
+                  ...baseLabels,
+                  [labelInfo.labelName]: childKey,
+                });
+              }
+            });
+          } else {
+            // Regular nested object - continue with concatenated name
+            extractRecursive(value, `${baseName}_${key}`, baseLabels);
+          }
         }
       }
     });
@@ -89,6 +163,11 @@ function extractMetrics(segmentData, shard) {
 
   function isRoomData(baseName, key) {
     // Room names follow pattern like E8N26, W1S1, etc.
+    return isRoomName(key);
+  }
+
+  function isRoomName(key) {
+    // Room names follow pattern like E8N26, W1S1, etc.
     return /^[EW]\d+[NS]\d+$/.test(key);
   }
 
@@ -100,12 +179,56 @@ function extractMetrics(segmentData, shard) {
     );
   }
 
-  function isUsageTypeData(baseName, key, value) {
-    return (
-      (baseName.includes("energyUsage") || baseName.includes("usage")) &&
-      typeof value === "object" &&
-      !value.hasOwnProperty("current")
+  // Generic function to detect patterns that should emit child keys as labels
+  // Returns { labelName: "label_name" } if pattern matches, null otherwise
+  function getLabeledDataPattern(baseName, key, value) {
+    if (typeof value !== "object" || value === null) return null;
+
+    // Don't apply to objects with special structure fields
+    if (value.hasOwnProperty("current") || value.hasOwnProperty("needed")) {
+      return null;
+    }
+
+    // Check if all values are either numbers or simple objects (no deep nesting)
+    const allChildrenAreSimple = Object.values(value).every(
+      (v) => typeof v === "number" || (typeof v === "object" && v !== null),
     );
+
+    if (!allChildrenAreSimple) return null;
+
+    // Pattern 0: If all keys are room names, use room label
+    const allKeysAreRooms = Object.keys(value).every((k) => isRoomName(k));
+    if (
+      allKeysAreRooms &&
+      Object.values(value).every((v) => typeof v === "number")
+    ) {
+      return { labelName: "room" };
+    }
+
+    // Pattern 1: energyUsage, cpuUsage, or any field ending with "Usage"
+    if (key.endsWith("Usage") || key === "usage") {
+      return { labelName: "type" };
+    }
+
+    // Pattern 2: CPU phase data
+    if (baseName.includes("cpu_usage")) {
+      return { labelName: "phase" };
+    }
+
+    // Pattern 3: Generic "states" or similar container objects
+    // Add more patterns here as needed
+    const labelPatterns = [
+      { keyPattern: /^(states|phases|types)$/i, labelName: "type" },
+      { keyPattern: /^(categories|groups)$/i, labelName: "category" },
+    ];
+
+    for (const pattern of labelPatterns) {
+      if (pattern.keyPattern.test(key)) {
+        return { labelName: pattern.labelName };
+      }
+    }
+
+    return null;
   }
 
   function isPhaseData(baseName, key, value) {
