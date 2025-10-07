@@ -95,7 +95,7 @@ local prometheus = grafana.prometheus;
         lines=true,
         staircase=true,
         fill=2,
-        linewidth=2,
+        linewidth=1,
       )
       .addTarget(
         prometheus.target(
