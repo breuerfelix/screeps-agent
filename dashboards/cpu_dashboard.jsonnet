@@ -5,6 +5,7 @@ local barGaugePanel = grafana.barGaugePanel;
 local pieChartPanel = grafana.pieChartPanel;
 local prometheus = grafana.prometheus;
 local template = grafana.template;
+local row = grafana.row;
 
 // Reusable style objects
 local styles = {
@@ -148,6 +149,8 @@ dashboard.new(
         label: 'Bucket',
         show: true,
         decimals: 0,
+        min: 0,
+        max: 10000,
       },
     ],
   },
@@ -156,6 +159,17 @@ dashboard.new(
     y: 0,
     w: 24,
     h: 12,
+  }
+)
+.addPanel(
+  row.new(
+    title='Energy Metrics',
+  ),
+  gridPos={
+    x: 0,
+    y: 12,
+    w: 24,
+    h: 1,
   }
 )
 .addPanel(
@@ -169,14 +183,14 @@ dashboard.new(
   )
   .addTarget(
     prometheus.target(
-      'sum by (type) (abs(avg_over_time(screeps_room_instantEnergyUsage{shard="$shard", room=~"$room", type!="mined"}[$__range])))',
+      'sum by (type) (abs(avg_over_time(screeps_room_instantEnergyUsage{shard="$shard", room=~"$room", type!="mined", type!="spawn"}[$__range])))',
       legendFormat='{{type}}',
       instant=true,
     )
   ),
   gridPos={
     x: 0,
-    y: 12,
+    y: 13,
     w: 6,
     h: 12,
   }
@@ -215,7 +229,7 @@ dashboard.new(
   },
   gridPos={
     x: 6,
-    y: 12,
+    y: 13,
     w: 6,
     h: 12,
   }
@@ -269,7 +283,7 @@ dashboard.new(
   },
   gridPos={
     x: 12,
-    y: 12,
+    y: 13,
     w: 12,
     h: 12,
   }
@@ -278,7 +292,7 @@ dashboard.new(
   graphPanel.new(
     'Energy Consumption by Type',
     datasource='VictoriaMetrics',
-    description='Stacked view of energy consumption by different activities',
+    description='Stacked view of energy consumption by different activities (spawn shown as average)',
     format='none',
     legend_show=true,
     legend_values=true,
@@ -294,8 +308,14 @@ dashboard.new(
   )
   .addTarget(
     prometheus.target(
-      'sum by (type) (abs(screeps_room_instantEnergyUsage{shard="$shard", room=~"$room", type!="mined"}))',
+      'sum by (type) (abs(screeps_room_instantEnergyUsage{shard="$shard", room=~"$room", type!="mined", type!="spawn"}))',
       legendFormat='{{type}}',
+    )
+  )
+  .addTarget(
+    prometheus.target(
+      'avg_over_time(abs(sum(screeps_room_instantEnergyUsage{shard="$shard", room=~"$room", type="spawn"}))[$__range])',
+      legendFormat='spawn (avg)',
     )
   ) + {
     yaxes: [
@@ -312,10 +332,8 @@ dashboard.new(
   },
   gridPos={
     x: 0,
-    y: 24,
+    y: 25,
     w: 24,
     h: 12,
   }
 )
-
-
