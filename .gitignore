@@ -1,3 +1,5 @@
+dashboards/*.json
+
 # Environment variables
 .env
 .env.local
