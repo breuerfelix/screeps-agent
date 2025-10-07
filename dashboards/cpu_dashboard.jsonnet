@@ -87,6 +87,21 @@ dashboard.new(
     sort=1,
   )
 )
+.addTemplate(
+  template.new(
+    'room_upgrading',
+    'VictoriaMetrics',
+    'query_result(screeps_room_rcl_level{shard="$shard"} < 8)',
+    label='RCL < 8 Rooms',
+    regex='/room="([^"]+)"/',
+    refresh='time',
+    multi=true,
+    includeAll=true,
+    allValues='.*',
+    sort=1,
+    hide=2,  // Hide variable from UI
+  )
+)
 // === CPU PANEL ===
 .addPanel(
   graphPanel.new(
@@ -382,16 +397,5 @@ dashboard.new(
   }
 )
 .addPanels(gclGplObj.panels)
-// === RCL ROW ===
-.addPanel(
-  row.new(
-    title='Room Control Level (RCL)',
-  ),
-  gridPos={
-    x: 0,
-    y: rclRowY,
-    w: 24,
-    h: 1,
-  }
-)
-.addPanels(rclPanels.new(rclY).panels)
+// === RCL ROWS (one per room) ===
+.addPanels(rclPanels.new(rclRowY).panels)

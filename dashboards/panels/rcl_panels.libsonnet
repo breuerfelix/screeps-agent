@@ -14,10 +14,27 @@ local row = grafana.row;
     linewidth: 3,
   },
 
-  // Create RCL panels
+  // Create RCL panels - one row per room (only shows rooms with RCL < 8)
+  // Each room gets its own row with 4 panels side by side
+  // Note: When all rooms are RCL 8, an "All" row with "No data" panels will appear
+  // This is standard Grafana behavior for repeating panels with empty variables
   new(startY):: {
     panels: [
-      // RCL Level (repeats for each room)
+      // Row for each room (repeats only for rooms with RCL < 8)
+      row.new(
+        title='$room_upgrading',
+        repeat='room_upgrading',
+        collapse=false,
+      ) + {
+        gridPos: {
+          x: 0,
+          y: startY,
+          w: 24,
+          h: 1,
+        },
+      },
+
+      // RCL Level
       singlestat.new(
         'RCL',
         datasource='VictoriaMetrics',
@@ -25,17 +42,15 @@ local row = grafana.row;
         valueName='current',
         valueFontSize='120%',
         decimals=0,
-        repeat='room',
       )
       .addTarget(
         prometheus.target(
-          'screeps_room_rcl_level{shard="$shard", room="$room"}',
-          legendFormat='{{room}}',
+          'screeps_room_rcl_level{shard="$shard", room="$room_upgrading"}',
         )
       ) + {
         gridPos: {
           x: 0,
-          y: startY,
+          y: startY + 1,
           w: 6,
           h: 6,
         },
@@ -54,16 +69,15 @@ local row = grafana.row;
         gaugeMaxValue=100,
         gaugeThresholdMarkers=true,
         thresholds='50,80',
-        repeat='room',
       )
       .addTarget(
         prometheus.target(
-          '(screeps_room_rcl_progress{shard="$shard", room="$room"} / screeps_room_rcl_progressTotal{shard="$shard", room="$room"}) * 100',
+          '(screeps_room_rcl_progress{shard="$shard", room="$room_upgrading"} / screeps_room_rcl_progressTotal{shard="$shard", room="$room_upgrading"}) * 100',
         )
       ) + {
         gridPos: {
           x: 6,
-          y: startY,
+          y: startY + 1,
           w: 6,
           h: 6,
         },
@@ -77,16 +91,15 @@ local row = grafana.row;
         valueName='current',
         valueFontSize='80%',
         decimals=3,
-        repeat='room',
       )
       .addTarget(
         prometheus.target(
-          '(screeps_room_rcl_progressTotal{shard="$shard", room="$room"} - screeps_room_rcl_progress{shard="$shard", room="$room"}) / (deriv(screeps_room_rcl_progress{shard="$shard", room="$room"}[1h]) * 3600 * 24 * 7)',
+          '(screeps_room_rcl_progressTotal{shard="$shard", room="$room_upgrading"} - screeps_room_rcl_progress{shard="$shard", room="$room_upgrading"}) / (deriv(screeps_room_rcl_progress{shard="$shard", room="$room_upgrading"}[1h]) * 3600 * 24 * 7)',
         )
       ) + {
         gridPos: {
           x: 12,
-          y: startY,
+          y: startY + 1,
           w: 6,
           h: 6,
         },
@@ -105,17 +118,16 @@ local row = grafana.row;
         legend_current=true,
         legend_alignAsTable=true,
         staircase=true,
-        repeat='room',
       )
       .addTarget(
         prometheus.target(
-          'screeps_room_rcl_progress{shard="$shard", room="$room"}',
+          'screeps_room_rcl_progress{shard="$shard", room="$room_upgrading"}',
           legendFormat='RCL per tick',
         )
       )
       .addTarget(
         prometheus.target(
-          'avg_over_time(screeps_room_rcl_progress{shard="$shard", room="$room"}[1h])',
+          'avg_over_time(screeps_room_rcl_progress{shard="$shard", room="$room_upgrading"}[1h])',
           legendFormat='1hr Moving Average',
         )
       )
@@ -124,13 +136,13 @@ local row = grafana.row;
       } + avgLine) + {
         gridPos: {
           x: 18,
-          y: startY,
+          y: startY + 1,
           w: 6,
           h: 6,
         },
       },
     ],
     
-    rowHeight: 6,
+    rowHeight: 7,  // 1 for row header + 6 for panels (repeats per room)
   },
 }
