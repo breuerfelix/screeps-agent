@@ -54,13 +54,13 @@ local rclRowY = gclGplY + gclGplObj.rowHeight;
 local rclY = rclRowY + 1;
 
 dashboard.new(
-  'Screeps CPU Metrics',
-  description='CPU usage, limits, and bucket monitoring',
+  'Screeps Metrics',
+  description='CPU, Energy, GCL, GPL, and RCL monitoring',
   time_from='now-6h',
   refresh='30s',
   tags=['screeps', 'cpu'],
   editable=true,
-  uid='screeps-cpu-metrics',
+  uid='screeps-metrics',
 )
 .addTemplate(
   template.new(
