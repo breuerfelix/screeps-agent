@@ -10,6 +10,7 @@ local row = grafana.row;
 local gclGplPanels = import 'panels/gcl_gpl_panels.libsonnet';
 local rclPanels = import 'panels/rcl_panels.libsonnet';
 local creepPanels = import 'panels/creep_panels.libsonnet';
+local assetPanels = import 'panels/asset_panels.libsonnet';
 
 // Reusable style objects
 local styles = {
@@ -52,7 +53,10 @@ local energyTotalHeight = energyHeight * 2;  // Energy section now has 2 rows
 local creepsRowY = energyY + energyTotalHeight;
 local creepsY = creepsRowY + 1;
 local creepsObj = creepPanels.new(creepsY);
-local gclGplRowY = creepsY + creepsObj.rowHeight;
+local assetsRowY = creepsY + creepsObj.rowHeight;
+local assetsY = assetsRowY + 1;
+local assetsObj = assetPanels.new(assetsY);
+local gclGplRowY = assetsY + assetsObj.rowHeight;
 local gclGplY = gclGplRowY + 1;
 local gclGplObj = gclGplPanels.new(gclGplY);
 local rclRowY = gclGplY + gclGplObj.rowHeight;
@@ -427,6 +431,19 @@ dashboard.new(
   }
 )
 .addPanels(creepsObj.panels)
+// === ASSETS ROW ===
+.addPanel(
+  row.new(
+    title='Room Assets',
+  ),
+  gridPos={
+    x: 0,
+    y: assetsRowY,
+    w: 24,
+    h: 1,
+  }
+)
+.addPanels(assetsObj.panels)
 // === GCL & GPL ROW ===
 .addPanel(
   row.new(
