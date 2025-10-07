@@ -48,7 +48,8 @@ local cpuHeight = 12;
 local energyRowY = cpuY + cpuHeight;
 local energyY = energyRowY + 1;
 local energyHeight = 12;
-local creepsRowY = energyY + energyHeight;
+local energyTotalHeight = energyHeight * 2;  // Energy section now has 2 rows
+local creepsRowY = energyY + energyTotalHeight;
 local creepsY = creepsRowY + 1;
 local creepsObj = creepPanels.new(creepsY);
 local gclGplRowY = creepsY + creepsObj.rowHeight;
@@ -208,35 +209,13 @@ dashboard.new(
 )
 .addPanel(
   pieChartPanel.new(
-    'Energy Consumption Breakdown',
-    datasource='VictoriaMetrics',
-    description='Average energy consumption by type (excluding mined/production)',
-    pieType='pie',
-    showLegend=true,
-    showLegendPercentage=true,
-  )
-  .addTarget(
-    prometheus.target(
-      'sum by (type) (abs(avg_over_time(screeps_room_instantEnergyUsage{shard="$shard", room=~"$room", type!="mined"}[$__range])))',
-      legendFormat='{{type}}',
-      instant=true,
-    )
-  ),
-  gridPos={
-    x: 0,
-    y: energyY,
-    w: 6,
-    h: energyHeight,
-  }
-)
-.addPanel(
-  pieChartPanel.new(
     'Production vs Consumption',
     datasource='VictoriaMetrics',
     description='Green = Produced, Blue = Consumed',
     pieType='pie',
     showLegend=true,
     showLegendPercentage=true,
+    legendType='Under graph',
   )
   .addTarget(
     prometheus.target(
@@ -262,9 +241,32 @@ dashboard.new(
     },
   },
   gridPos={
-    x: 6,
+    x: 0,
     y: energyY,
-    w: 6,
+    w: 5,
+    h: energyHeight,
+  }
+)
+.addPanel(
+  pieChartPanel.new(
+    'Energy Production by Room',
+    datasource='VictoriaMetrics',
+    description='Distribution of energy production across rooms',
+    pieType='pie',
+    showLegend=true,
+    showLegendPercentage=true,
+  )
+  .addTarget(
+    prometheus.target(
+      'sum by (room) (avg_over_time(screeps_room_instantEnergyUsage{shard="$shard", room=~"$room", type="mined"}[$__range]))',
+      legendFormat='{{room}}',
+      instant=true,
+    )
+  ),
+  gridPos={
+    x: 5,
+    y: energyY,
+    w: 5,
     h: energyHeight,
   }
 )
@@ -272,37 +274,38 @@ dashboard.new(
   graphPanel.new(
     'Energy Production',
     datasource='VictoriaMetrics',
-    description='Energy production over time (mined energy)',
+    description='Energy production over time by room (stacked)',
     format='none',
     legend_show=true,
     legend_values=true,
-    legend_min=true,
-    legend_max=true,
+    legend_min=false,
+    legend_max=false,
     legend_avg=true,
     legend_current=true,
     legend_alignAsTable=true,
-    legend_rightSide=false,
+    legend_rightSide=true,
+    stack=true,
+    fill=5,
+    linewidth=1,
     staircase=true,
   )
   .addTarget(
     prometheus.target(
-      'sum(screeps_room_instantEnergyUsage{shard="$shard", room=~"$room", type="mined"})',
-      legendFormat='Energy Produced',
+      'sum by (room) (screeps_room_instantEnergyUsage{shard="$shard", room=~"$room", type="mined"})',
+      legendFormat='{{room}}',
     )
   )
   .addTarget(
     prometheus.target(
       'avg_over_time(sum(screeps_room_instantEnergyUsage{shard="$shard", room=~"$room", type="mined"})[$__range])',
-      legendFormat='Energy Produced (avg)',
+      legendFormat='Total (avg)',
     )
   )
   .addSeriesOverride({
-    alias: 'Energy Produced',
-    color: 'green',
-  } + styles.filledLine)
-  .addSeriesOverride({
-    alias: 'Energy Produced (avg)',
-    color: 'blue',
+    alias: 'Total (avg)',
+    stack: false,
+    fill: 0,
+    linewidth: 3,
   } + styles.avgLine) + {
     yaxes: [
       {
@@ -317,9 +320,9 @@ dashboard.new(
     ],
   },
   gridPos={
-    x: 12,
+    x: 10,
     y: energyY,
-    w: 12,
+    w: 14,
     h: energyHeight,
   }
 )
@@ -336,7 +339,7 @@ dashboard.new(
     legend_avg=true,
     legend_current=true,
     legend_alignAsTable=true,
-    legend_rightSide=false,
+    legend_rightSide=true,
     stack=true,
     fill=5,
     linewidth=1,
@@ -384,7 +387,30 @@ dashboard.new(
   gridPos={
     x: 0,
     y: energyY + energyHeight,
-    w: 24,
+    w: 18,
+    h: energyHeight,
+  }
+)
+.addPanel(
+  pieChartPanel.new(
+    'Energy Consumption Breakdown',
+    datasource='VictoriaMetrics',
+    description='Average energy consumption by type (excluding mined/production)',
+    pieType='pie',
+    showLegend=true,
+    showLegendPercentage=true,
+  )
+  .addTarget(
+    prometheus.target(
+      'sum by (type) (abs(avg_over_time(screeps_room_instantEnergyUsage{shard="$shard", room=~"$room", type!="mined"}[$__range])))',
+      legendFormat='{{type}}',
+      instant=true,
+    )
+  ),
+  gridPos={
+    x: 18,
+    y: energyY + energyHeight,
+    w: 6,
     h: energyHeight,
   }
 )
