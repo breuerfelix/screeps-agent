@@ -86,6 +86,7 @@ dashboard.new(
     legend_current=false,
     legend_alignAsTable=true,
     legend_rightSide=false,
+    staircase=true,
   )
   .addTarget(
     prometheus.target(
@@ -248,6 +249,7 @@ dashboard.new(
     legend_current=true,
     legend_alignAsTable=true,
     legend_rightSide=false,
+    staircase=true,
   )
   .addTarget(
     prometheus.target(
@@ -305,6 +307,7 @@ dashboard.new(
     stack=true,
     fill=5,
     linewidth=1,
+    staircase=true,
   )
   .addTarget(
     prometheus.target(
