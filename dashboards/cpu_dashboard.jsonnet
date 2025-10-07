@@ -347,7 +347,7 @@ dashboard.new(
   .addTarget(
     prometheus.target(
       'avg_over_time(abs(sum(screeps_room_instantEnergyUsage{shard="$shard", room=~"$room", type="spawn"}))[$__range])',
-      legendFormat='spawn',
+      legendFormat='spawn (avg)',
     )
   )
   .addTarget(
@@ -357,7 +357,7 @@ dashboard.new(
     )
   )
   .addSeriesOverride({
-    alias: 'spawn',
+    alias: 'spawn (avg)',
     color: 'orange',
   })
   .addSeriesOverride({
