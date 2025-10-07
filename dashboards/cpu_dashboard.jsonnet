@@ -183,7 +183,7 @@ dashboard.new(
   )
   .addTarget(
     prometheus.target(
-      'sum by (type) (abs(avg_over_time(screeps_room_instantEnergyUsage{shard="$shard", room=~"$room", type!="mined", type!="spawn"}[$__range])))',
+      'sum by (type) (abs(avg_over_time(screeps_room_instantEnergyUsage{shard="$shard", room=~"$room", type!="mined"}[$__range])))',
       legendFormat='{{type}}',
       instant=true,
     )
@@ -251,13 +251,13 @@ dashboard.new(
   )
   .addTarget(
     prometheus.target(
-      'avg(screeps_room_instantEnergyUsage{shard="$shard", room=~"$room", type="mined"})',
+      'sum(screeps_room_instantEnergyUsage{shard="$shard", room=~"$room", type="mined"})',
       legendFormat='Energy Produced',
     )
   )
   .addTarget(
     prometheus.target(
-      'avg_over_time(avg(screeps_room_instantEnergyUsage{shard="$shard", room=~"$room", type="mined"})[$__range])',
+      'avg_over_time(sum(screeps_room_instantEnergyUsage{shard="$shard", room=~"$room", type="mined"})[$__range])',
       legendFormat='Energy Produced (avg)',
     )
   )
@@ -317,7 +317,18 @@ dashboard.new(
       'avg_over_time(abs(sum(screeps_room_instantEnergyUsage{shard="$shard", room=~"$room", type="spawn"}))[$__range])',
       legendFormat='spawn (avg)',
     )
-  ) + {
+  )
+  .addTarget(
+    prometheus.target(
+      'avg_over_time(sum(screeps_room_instantEnergyUsage{shard="$shard", room=~"$room", type="mined"})[$__range])',
+      legendFormat='production (avg)',
+    )
+  )
+  .addSeriesOverride({
+    alias: 'production (avg)',
+    color: 'green',
+    stack: false,
+  } + styles.avgLine) + {
     yaxes: [
       {
         format: 'none',
