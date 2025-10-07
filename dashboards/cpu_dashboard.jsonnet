@@ -9,6 +9,7 @@ local row = grafana.row;
 // Import panel modules
 local gclGplPanels = import 'panels/gcl_gpl_panels.libsonnet';
 local rclPanels = import 'panels/rcl_panels.libsonnet';
+local creepPanels = import 'panels/creep_panels.libsonnet';
 
 // Reusable style objects
 local styles = {
@@ -47,7 +48,10 @@ local cpuHeight = 12;
 local energyRowY = cpuY + cpuHeight;
 local energyY = energyRowY + 1;
 local energyHeight = 12;
-local gclGplRowY = energyY + energyHeight;
+local creepsRowY = energyY + energyHeight;
+local creepsY = creepsRowY + 1;
+local creepsObj = creepPanels.new(creepsY);
+local gclGplRowY = creepsY + creepsObj.rowHeight;
 local gclGplY = gclGplRowY + 1;
 local gclGplObj = gclGplPanels.new(gclGplY);
 local rclRowY = gclGplY + gclGplObj.rowHeight;
@@ -384,6 +388,19 @@ dashboard.new(
     h: energyHeight,
   }
 )
+// === CREEPS ROW ===
+.addPanel(
+  row.new(
+    title='Creeps',
+  ),
+  gridPos={
+    x: 0,
+    y: creepsRowY,
+    w: 24,
+    h: 1,
+  }
+)
+.addPanels(creepsObj.panels)
 // === GCL & GPL ROW ===
 .addPanel(
   row.new(
