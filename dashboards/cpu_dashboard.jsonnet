@@ -1,11 +1,14 @@
 local grafana = import 'grafonnet-lib/grafonnet/grafana.libsonnet';
 local dashboard = grafana.dashboard;
 local graphPanel = grafana.graphPanel;
-local barGaugePanel = grafana.barGaugePanel;
 local pieChartPanel = grafana.pieChartPanel;
 local prometheus = grafana.prometheus;
 local template = grafana.template;
 local row = grafana.row;
+
+// Import panel modules
+local gclGplPanels = import 'panels/gcl_gpl_panels.libsonnet';
+local rclPanels = import 'panels/rcl_panels.libsonnet';
 
 // Reusable style objects
 local styles = {
@@ -37,6 +40,18 @@ local styles = {
     linewidth: 2,
   },
 };
+
+// Calculate Y positions
+local cpuY = 0;
+local cpuHeight = 12;
+local energyRowY = cpuY + cpuHeight;
+local energyY = energyRowY + 1;
+local energyHeight = 12;
+local gclGplRowY = energyY + energyHeight;
+local gclGplY = gclGplRowY + 1;
+local gclGplObj = gclGplPanels.new(gclGplY);
+local rclRowY = gclGplY + gclGplObj.rowHeight;
+local rclY = rclRowY + 1;
 
 dashboard.new(
   'Screeps CPU Metrics',
@@ -72,6 +87,7 @@ dashboard.new(
     sort=1,
   )
 )
+// === CPU PANEL ===
 .addPanel(
   graphPanel.new(
     'CPU Usage & Bucket',
@@ -106,7 +122,6 @@ dashboard.new(
       legendFormat='CPU Used (10m avg)',
     )
     {
-      // Make this a dotted line
       dashes: true,
       dashLength: 10,
       spaceLength: 10,
@@ -118,7 +133,6 @@ dashboard.new(
       legendFormat='CPU Bucket',
     )
     {
-      // This target uses the right Y-axis
       yaxis: 2,
     }
   )
@@ -137,7 +151,6 @@ dashboard.new(
     fill: 0,
   })
   {
-    // Configure the Y-axes
     yaxes: [
       {
         format: 'ms',
@@ -157,18 +170,19 @@ dashboard.new(
   },
   gridPos={
     x: 0,
-    y: 0,
+    y: cpuY,
     w: 24,
-    h: 12,
+    h: cpuHeight,
   }
 )
+// === ENERGY METRICS ROW ===
 .addPanel(
   row.new(
     title='Energy Metrics',
   ),
   gridPos={
     x: 0,
-    y: 12,
+    y: energyRowY,
     w: 24,
     h: 1,
   }
@@ -177,7 +191,7 @@ dashboard.new(
   pieChartPanel.new(
     'Energy Consumption Breakdown',
     datasource='VictoriaMetrics',
-    description='How energy is consumed by different activities (dynamically includes all consumer types)',
+    description='Average energy consumption by type (excluding mined/production)',
     pieType='pie',
     showLegend=true,
     showLegendPercentage=true,
@@ -191,16 +205,16 @@ dashboard.new(
   ),
   gridPos={
     x: 0,
-    y: 13,
+    y: energyY,
     w: 6,
-    h: 12,
+    h: energyHeight,
   }
 )
 .addPanel(
   pieChartPanel.new(
     'Production vs Consumption',
     datasource='VictoriaMetrics',
-    description='Green = Produced, Blue = Consumed. Bigger color = more of that activity',
+    description='Green = Produced, Blue = Consumed',
     pieType='pie',
     showLegend=true,
     showLegendPercentage=true,
@@ -217,7 +231,7 @@ dashboard.new(
   .addTarget(
     prometheus.target(
       |||
-        abs(sum(avg_over_time(screeps_room_instantEnergyUsage{shard="$shard", room=~"$room", type!="mined"}[$__range])))
+        sum(abs(avg_over_time(screeps_room_instantEnergyUsage{shard="$shard", room=~"$room", type!="mined"}[$__range])))
       |||,
       legendFormat='Consumed',
       instant=true,
@@ -230,9 +244,9 @@ dashboard.new(
   },
   gridPos={
     x: 6,
-    y: 13,
+    y: energyY,
     w: 6,
-    h: 12,
+    h: energyHeight,
   }
 )
 .addPanel(
@@ -285,16 +299,16 @@ dashboard.new(
   },
   gridPos={
     x: 12,
-    y: 13,
+    y: energyY,
     w: 12,
-    h: 12,
+    h: energyHeight,
   }
 )
 .addPanel(
   graphPanel.new(
     'Energy Consumption by Type',
     datasource='VictoriaMetrics',
-    description='Stacked view of energy consumption by different activities (spawn shown as average)',
+    description='Stacked view of energy consumption by different activities',
     format='none',
     legend_show=true,
     legend_values=true,
@@ -318,7 +332,7 @@ dashboard.new(
   .addTarget(
     prometheus.target(
       'avg_over_time(abs(sum(screeps_room_instantEnergyUsage{shard="$shard", room=~"$room", type="spawn"}))[$__range])',
-      legendFormat='spawn (avg)',
+      legendFormat='spawn',
     )
   )
   .addTarget(
@@ -328,9 +342,13 @@ dashboard.new(
     )
   )
   .addSeriesOverride({
+    alias: 'spawn',
+    color: 'orange',
+  })
+  .addSeriesOverride({
     alias: 'production (avg)',
-    color: 'green',
     stack: false,
+    color: 'green',
   } + styles.avgLine) + {
     yaxes: [
       {
@@ -346,8 +364,34 @@ dashboard.new(
   },
   gridPos={
     x: 0,
-    y: 25,
+    y: energyY + energyHeight,
     w: 24,
-    h: 12,
+    h: energyHeight,
   }
 )
+// === GCL & GPL ROW ===
+.addPanel(
+  row.new(
+    title='Global Control Level (GCL) & Global Power Level (GPL)',
+  ),
+  gridPos={
+    x: 0,
+    y: gclGplRowY,
+    w: 24,
+    h: 1,
+  }
+)
+.addPanels(gclGplObj.panels)
+// === RCL ROW ===
+.addPanel(
+  row.new(
+    title='Room Control Level (RCL)',
+  ),
+  gridPos={
+    x: 0,
+    y: rclRowY,
+    w: 24,
+    h: 1,
+  }
+)
+.addPanels(rclPanels.new(rclY).panels)
