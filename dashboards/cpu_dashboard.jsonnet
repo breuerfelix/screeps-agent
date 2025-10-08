@@ -44,9 +44,12 @@ local styles = {
 };
 
 // Calculate Y positions
-local cpuY = 0;
+local cpuRowY = 0;
+local cpuY = cpuRowY + 1;
 local cpuHeight = 12;
-local energyRowY = cpuY + cpuHeight;
+local cpuPerCreepY = cpuY + cpuHeight;
+local cpuPerCreepHeight = 12;
+local energyRowY = cpuPerCreepY + cpuPerCreepHeight;
 local energyY = energyRowY + 1;
 local energyHeight = 12;
 local energyTotalHeight = energyHeight * 2;  // Energy section now has 2 rows
@@ -111,6 +114,18 @@ dashboard.new(
     hide=2,  // Hide variable from UI
   )
 )
+// === CPU METRICS ROW ===
+.addPanel(
+  row.new(
+    title='CPU Metrics',
+  ),
+  gridPos={
+    x: 0,
+    y: cpuRowY,
+    w: 24,
+    h: 1,
+  }
+)
 // === CPU PANEL ===
 .addPanel(
   graphPanel.new(
@@ -142,8 +157,8 @@ dashboard.new(
   )
   .addTarget(
     prometheus.target(
-      'avg_over_time(screeps_cpu_getUsed{shard="$shard"}[10m])',
-      legendFormat='CPU Used (10m avg)',
+      'avg_over_time(screeps_cpu_getUsed{shard="$shard"}[1h])',
+      legendFormat='CPU Used (1h avg)',
     )
     {
       dashes: true,
@@ -164,7 +179,8 @@ dashboard.new(
     alias: 'CPU Used',
   } + styles.standardLine)
   .addSeriesOverride({
-    alias: 'CPU Used (10m avg)',
+    alias: 'CPU Used (1h avg)',
+    color: 'yellow',
   } + styles.avgLine)
   .addSeriesOverride({
     alias: 'CPU Limit',
@@ -197,6 +213,156 @@ dashboard.new(
     y: cpuY,
     w: 24,
     h: cpuHeight,
+  }
+)
+// === CPU PER CREEP PANEL ===
+.addPanel(
+  graphPanel.new(
+    'CPU Usage per Creep',
+    datasource='VictoriaMetrics',
+    description='Average CPU usage per creep (Total CPU / Total Creeps)',
+    format='ms',
+    legend_show=true,
+    legend_values=true,
+    legend_min=false,
+    legend_max=false,
+    legend_avg=true,
+    legend_current=true,
+    legend_alignAsTable=true,
+    legend_rightSide=false,
+    stack=false,
+    fill=1,
+    linewidth=1,
+    staircase=true,
+  )
+  .addTarget(
+    prometheus.target(
+      'screeps_cpu_getUsed{shard="$shard"} / sum(screeps_room_creeps_current{shard="$shard", room=~"$room"})',
+      legendFormat='CPU per Creep',
+    )
+  )
+  .addTarget(
+    prometheus.target(
+      'avg_over_time((screeps_cpu_getUsed{shard="$shard"} / sum(screeps_room_creeps_current{shard="$shard", room=~"$room"}))[1h:])',
+      legendFormat='CPU per Creep (1h avg)',
+    )
+  )
+  .addTarget(
+    prometheus.target(
+      'sum(screeps_room_creeps_current{shard="$shard", room=~"$room"})',
+      legendFormat='Total Creeps',
+    )
+  )
+  .addSeriesOverride({
+    alias: 'CPU per Creep',
+    color: 'green',
+    linewidth: 1,
+    fill: 2,
+  })
+  .addSeriesOverride({
+    alias: 'CPU per Creep (1h avg)',
+  } + styles.avgLine)
+  .addSeriesOverride({
+    alias: 'Total Creeps',
+    yaxis: 2,
+    color: 'orange',
+    fill: 0,
+  }) + {
+    yaxes: [
+      {
+        format: 'ms',
+        label: 'CPU per Creep',
+        show: true,
+        decimals: 2,
+      },
+      {
+        format: 'short',
+        label: 'Total Creeps',
+        show: true,
+        decimals: 0,
+      },
+    ],
+  },
+  gridPos={
+    x: 0,
+    y: cpuPerCreepY,
+    w: 12,
+    h: cpuPerCreepHeight,
+  }
+)
+// === CPU PER ROOM PANEL ===
+.addPanel(
+  graphPanel.new(
+    'CPU Usage per Room',
+    datasource='VictoriaMetrics',
+    description='Average CPU usage per room (Total CPU / Number of Rooms)',
+    format='ms',
+    legend_show=true,
+    legend_values=true,
+    legend_min=false,
+    legend_max=false,
+    legend_avg=true,
+    legend_current=true,
+    legend_alignAsTable=true,
+    legend_rightSide=false,
+    stack=false,
+    fill=1,
+    linewidth=1,
+    staircase=true,
+  )
+  .addTarget(
+    prometheus.target(
+      'screeps_cpu_getUsed{shard="$shard"} / count(screeps_room_rcl_level{shard="$shard", room=~"$room"})',
+      legendFormat='CPU per Room',
+    )
+  )
+  .addTarget(
+    prometheus.target(
+      'avg_over_time((screeps_cpu_getUsed{shard="$shard"} / count(screeps_room_rcl_level{shard="$shard", room=~"$room"}))[1h:])',
+      legendFormat='CPU per Room (1h avg)',
+    )
+  )
+  .addTarget(
+    prometheus.target(
+      'count(screeps_room_rcl_level{shard="$shard", room=~"$room"})',
+      legendFormat='Room Count',
+    )
+  )
+  .addSeriesOverride({
+    alias: 'CPU per Room',
+    color: 'green',
+    linewidth: 1,
+    fill: 2,
+  })
+  .addSeriesOverride({
+    alias: 'CPU per Room (1h avg)',
+  } + styles.avgLine)
+  .addSeriesOverride({
+    alias: 'Room Count',
+    yaxis: 2,
+    color: 'orange',
+    fill: 0,
+  }) + {
+    yaxes: [
+      {
+        format: 'ms',
+        label: 'CPU per Room',
+        show: true,
+        decimals: 2,
+      },
+      {
+        format: 'short',
+        label: 'Room Count',
+        show: true,
+        decimals: 0,
+      },
+    ],
+  },
+  gridPos={
+    x: 12,
+    y: cpuPerCreepY,
+    w: 12,
+    h: cpuPerCreepHeight,
   }
 )
 // === ENERGY METRICS ROW ===
