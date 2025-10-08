@@ -157,8 +157,8 @@ dashboard.new(
   )
   .addTarget(
     prometheus.target(
-      'avg_over_time(screeps_cpu_getUsed{shard="$shard"}[1h])',
-      legendFormat='CPU Used (1h avg)',
+      'avg_over_time(screeps_cpu_getUsed{shard="$shard"}[$__range])',
+      legendFormat='CPU Used (avg)',
     )
     {
       dashes: true,
@@ -179,7 +179,7 @@ dashboard.new(
     alias: 'CPU Used',
   } + styles.standardLine)
   .addSeriesOverride({
-    alias: 'CPU Used (1h avg)',
+    alias: 'CPU Used (avg)',
     color: 'yellow',
   } + styles.avgLine)
   .addSeriesOverride({
@@ -243,8 +243,8 @@ dashboard.new(
   )
   .addTarget(
     prometheus.target(
-      'avg_over_time((screeps_cpu_getUsed{shard="$shard"} / sum(screeps_room_creeps_current{shard="$shard", room=~"$room"}))[1h:])',
-      legendFormat='CPU per Creep (1h avg)',
+      'avg_over_time((screeps_cpu_getUsed{shard="$shard"} / sum(screeps_room_creeps_current{shard="$shard", room=~"$room"}))[$__range])',
+      legendFormat='CPU per Creep (avg)',
     )
   )
   .addTarget(
@@ -260,7 +260,7 @@ dashboard.new(
     fill: 2,
   })
   .addSeriesOverride({
-    alias: 'CPU per Creep (1h avg)',
+    alias: 'CPU per Creep (avg)',
   } + styles.avgLine)
   .addSeriesOverride({
     alias: 'Total Creeps',
@@ -318,8 +318,8 @@ dashboard.new(
   )
   .addTarget(
     prometheus.target(
-      'avg_over_time((screeps_cpu_getUsed{shard="$shard"} / count(screeps_room_rcl_level{shard="$shard", room=~"$room"}))[1h:])',
-      legendFormat='CPU per Room (1h avg)',
+      'avg_over_time((screeps_cpu_getUsed{shard="$shard"} / count(screeps_room_rcl_level{shard="$shard", room=~"$room"}))[$__range])',
+      legendFormat='CPU per Room (avg)',
     )
   )
   .addTarget(
@@ -335,7 +335,7 @@ dashboard.new(
     fill: 2,
   })
   .addSeriesOverride({
-    alias: 'CPU per Room (1h avg)',
+    alias: 'CPU per Room (avg)',
   } + styles.avgLine)
   .addSeriesOverride({
     alias: 'Room Count',

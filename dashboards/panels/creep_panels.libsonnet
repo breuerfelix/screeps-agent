@@ -57,7 +57,23 @@ local prometheus = grafana.prometheus;
           'sum by (role) (screeps_room_creeps_current{shard="$shard", room=~"$room"})',
           legendFormat='{{role}}',
         )
-      ) + {
+      )
+      .addTarget(
+        prometheus.target(
+          'avg_over_time(sum(screeps_room_creeps_current{shard="$shard", room=~"$room"})[$__range])',
+          legendFormat='Total (avg)',
+        )
+      )
+      .addSeriesOverride({
+        alias: 'Total (avg)',
+        stack: false,
+        fill: 0,
+        linewidth: 3,
+        color: 'yellow',
+        dashes: true,
+        dashLength: 10,
+        spaceLength: 10,
+      }) + {
         yaxes: [
           {
             format: 'none',
