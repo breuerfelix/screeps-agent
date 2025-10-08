@@ -52,7 +52,7 @@ local cpuPerCreepHeight = 12;
 local energyRowY = cpuPerCreepY + cpuPerCreepHeight;
 local energyY = energyRowY + 1;
 local energyHeight = 12;
-local energyTotalHeight = energyHeight * 2;  // Energy section now has 2 rows
+local energyTotalHeight = energyHeight * 3;  // Energy section now has 3 rows
 local creepsRowY = energyY + energyTotalHeight;
 local creepsY = creepsRowY + 1;
 local creepsObj = creepPanels.new(creepsY);
@@ -413,7 +413,73 @@ dashboard.new(
   gridPos={
     x: 0,
     y: energyY,
-    w: 5,
+    w: 6,
+    h: energyHeight,
+  }
+)
+.addPanel(
+  graphPanel.new(
+    'Production vs Consumption Balance',
+    datasource='VictoriaMetrics',
+    description='Averaged balance over selected time range. Green above zero = surplus production, Red below zero = deficit (consuming more than producing)',
+    format='none',
+    legend_show=true,
+    legend_values=true,
+    legend_min=false,
+    legend_max=false,
+    legend_avg=true,
+    legend_current=true,
+    legend_alignAsTable=true,
+    legend_rightSide=false,
+    stack=false,
+    fill=5,
+    linewidth=2,
+    staircase=false,
+  )
+  .addTarget(
+    prometheus.target(
+      'clamp_min(avg_over_time(sum(screeps_room_instantEnergyUsage{shard="$shard", room=~"$room", type="mined"})[$__range]) + avg_over_time(sum(screeps_room_instantEnergyUsage{shard="$shard", room=~"$room", type!="mined"})[$__range]), 0)',
+      legendFormat='Surplus (Production > Consumption)',
+    )
+  )
+  .addTarget(
+    prometheus.target(
+      'clamp_max(avg_over_time(sum(screeps_room_instantEnergyUsage{shard="$shard", room=~"$room", type="mined"})[$__range]) + avg_over_time(sum(screeps_room_instantEnergyUsage{shard="$shard", room=~"$room", type!="mined"})[$__range]), 0)',
+      legendFormat='Deficit (Consumption > Production)',
+    )
+  )
+  .addSeriesOverride({
+    alias: 'Surplus (Production > Consumption)',
+    color: '#73BF69',  // Green
+    linewidth: 2,
+    fill: 5,
+  })
+  .addSeriesOverride({
+    alias: 'Deficit (Consumption > Production)',
+    color: '#F2495C',  // Red
+    linewidth: 2,
+    fill: 5,
+  }) + {
+    yaxes: [
+      {
+        format: 'none',
+        label: 'Energy/tick',
+        show: true,
+        decimals: 2,
+      },
+      {
+        show: false,
+      },
+    ],
+    grid: {
+      threshold1: 0,
+      threshold1Color: 'rgba(216, 200, 27, 0.7)',
+    },
+  },
+  gridPos={
+    x: 6,
+    y: energyY,
+    w: 18,
     h: energyHeight,
   }
 )
@@ -434,9 +500,9 @@ dashboard.new(
     )
   ),
   gridPos={
-    x: 5,
-    y: energyY,
-    w: 5,
+    x: 0,
+    y: energyY + energyHeight,
+    w: 6,
     h: energyHeight,
   }
 )
@@ -490,9 +556,32 @@ dashboard.new(
     ],
   },
   gridPos={
-    x: 10,
-    y: energyY,
-    w: 14,
+    x: 6,
+    y: energyY + energyHeight,
+    w: 18,
+    h: energyHeight,
+  }
+)
+.addPanel(
+  pieChartPanel.new(
+    'Energy Consumption Breakdown',
+    datasource='VictoriaMetrics',
+    description='Average energy consumption by type (excluding mined/production)',
+    pieType='pie',
+    showLegend=true,
+    showLegendPercentage=true,
+  )
+  .addTarget(
+    prometheus.target(
+      'sum by (type) (abs(avg_over_time(screeps_room_instantEnergyUsage{shard="$shard", room=~"$room", type!="mined"}[$__range])))',
+      legendFormat='{{type}}',
+      instant=true,
+    )
+  ),
+  gridPos={
+    x: 0,
+    y: energyY + (energyHeight * 2),
+    w: 6,
     h: energyHeight,
   }
 )
@@ -555,32 +644,9 @@ dashboard.new(
     ],
   },
   gridPos={
-    x: 0,
-    y: energyY + energyHeight,
+    x: 6,
+    y: energyY + (energyHeight * 2),
     w: 18,
-    h: energyHeight,
-  }
-)
-.addPanel(
-  pieChartPanel.new(
-    'Energy Consumption Breakdown',
-    datasource='VictoriaMetrics',
-    description='Average energy consumption by type (excluding mined/production)',
-    pieType='pie',
-    showLegend=true,
-    showLegendPercentage=true,
-  )
-  .addTarget(
-    prometheus.target(
-      'sum by (type) (abs(avg_over_time(screeps_room_instantEnergyUsage{shard="$shard", room=~"$room", type!="mined"}[$__range])))',
-      legendFormat='{{type}}',
-      instant=true,
-    )
-  ),
-  gridPos={
-    x: 18,
-    y: energyY + energyHeight,
-    w: 6,
     h: energyHeight,
   }
 )
