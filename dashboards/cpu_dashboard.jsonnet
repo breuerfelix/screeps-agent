@@ -529,8 +529,8 @@ dashboard.new(
   )
   .addTarget(
     prometheus.target(
-      'avg_over_time(sum(screeps_room_instantEnergyUsage{shard="$shard", room=~"$room", type="mined"})[$__range])',
-      legendFormat='production (avg)',
+      'avg_over_time(sum(abs(screeps_room_instantEnergyUsage{shard="$shard", room=~"$room", type!="mined"}))[$__range])',
+      legendFormat='consumption (avg)',
     )
   )
   .addSeriesOverride({
@@ -538,9 +538,9 @@ dashboard.new(
     color: 'orange',
   })
   .addSeriesOverride({
-    alias: 'production (avg)',
+    alias: 'consumption (avg)',
     stack: false,
-    color: 'green',
+    color: 'yellow',
   } + styles.avgLine) + {
     yaxes: [
       {
