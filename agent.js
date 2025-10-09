@@ -3,7 +3,7 @@
 const cron = require("node-cron");
 const { processShards } = require("./one_shot");
 
-const SHARDS = ["shard1", "shard2", "shard3"];
+const SHARDS = ["shard1", "shard3"];
 
 class ScreepsAgent {
   constructor() {

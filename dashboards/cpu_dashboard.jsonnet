@@ -52,7 +52,7 @@ local cpuPerCreepHeight = 12;
 local energyRowY = cpuPerCreepY + cpuPerCreepHeight;
 local energyY = energyRowY + 1;
 local energyHeight = 12;
-local energyTotalHeight = energyHeight * 3;  // Energy section now has 3 rows
+local energyTotalHeight = energyHeight * 4;  // Energy section now has 4 rows
 local creepsRowY = energyY + energyTotalHeight;
 local creepsY = creepsRowY + 1;
 local creepsObj = creepPanels.new(creepsY);
@@ -647,6 +647,58 @@ dashboard.new(
     x: 6,
     y: energyY + (energyHeight * 2),
     w: 18,
+    h: energyHeight,
+  }
+)
+.addPanel(
+  graphPanel.new(
+    'Energy Balance by Room',
+    datasource='VictoriaMetrics',
+    description='Energy balance per room (averaged over time). Green above zero = room produces surplus, Red below zero = room consumes more than it produces',
+    format='none',
+    legend_show=true,
+    legend_values=true,
+    legend_min=false,
+    legend_max=false,
+    legend_avg=true,
+    legend_current=true,
+    legend_alignAsTable=true,
+    legend_rightSide=true,
+    stack=false,
+    fill=3,
+    linewidth=1,
+    staircase=false,
+  )
+  .addTarget(
+    prometheus.target(
+      'avg_over_time(sum by (room) (screeps_room_instantEnergyUsage{shard="$shard", room=~"$room", type="mined"})[$__range]) + avg_over_time(sum by (room) (screeps_room_instantEnergyUsage{shard="$shard", room=~"$room", type!="mined"})[$__range])',
+      legendFormat='{{room}}',
+    )
+  )
+  .addSeriesOverride({
+    alias: '/.+/',
+    color: '#73BF69',  // Default green for positive
+  }) + {
+    yaxes: [
+      {
+        format: 'none',
+        label: 'Energy/tick',
+        show: true,
+        decimals: 2,
+      },
+      {
+        show: false,
+      },
+    ],
+    grid: {
+      threshold1: 0,
+      threshold1Color: 'rgba(216, 200, 27, 0.7)',
+    },
+  },
+  gridPos={
+    x: 0,
+    y: energyY + (energyHeight * 3),
+    w: 24,
     h: energyHeight,
   }
 )
