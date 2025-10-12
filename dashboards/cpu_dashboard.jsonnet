@@ -651,6 +651,30 @@ dashboard.new(
   }
 )
 .addPanel(
+  pieChartPanel.new(
+    'Spawn to Mine Ratio by Room',
+    datasource='VictoriaMetrics',
+    description='Ratio of mined energy to spawn energy cost per room (higher = more efficient)',
+    pieType='pie',
+    showLegend=true,
+    showLegendPercentage=true,
+    legendType='Right side',
+  )
+  .addTarget(
+    prometheus.target(
+      'avg_over_time(sum by (room) (screeps_room_instantEnergyUsage{shard="$shard", room=~"$room", type="mined"})[$__range]) / abs(avg_over_time(sum by (room) (screeps_room_instantEnergyUsage{shard="$shard", room=~"$room", type="spawn"})[$__range]))',
+      legendFormat='{{room}}',
+      instant=true,
+    )
+  ),
+  gridPos={
+    x: 0,
+    y: energyY + (energyHeight * 3),
+    w: 6,
+    h: energyHeight,
+  }
+)
+.addPanel(
   graphPanel.new(
     'Energy Balance by Room',
     datasource='VictoriaMetrics',
@@ -696,9 +720,9 @@ dashboard.new(
     },
   },
   gridPos={
-    x: 0,
+    x: 6,
     y: energyY + (energyHeight * 3),
-    w: 24,
+    w: 18,
     h: energyHeight,
   }
 )
