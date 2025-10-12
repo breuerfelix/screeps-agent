@@ -73,6 +73,7 @@ dashboard.new(
   tags=['screeps', 'cpu'],
   editable=true,
   uid='screeps-metrics',
+  graphTooltip='shared_crosshair',
 )
 .addTemplate(
   template.new(

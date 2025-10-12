@@ -20,7 +20,7 @@ local pieChartPanel = grafana.pieChartPanel;
         'Energy per Room Over Time',
         datasource='VictoriaMetrics',
         description='Energy storage by room over time (stacked)',
-        format='none',
+        format='short',
         legend_show=true,
         legend_values=true,
         legend_min=false,
@@ -42,7 +42,7 @@ local pieChartPanel = grafana.pieChartPanel;
       ) + {
         yaxes: [
           {
-            format: 'none',
+            format: 'short',
             label: 'Energy',
             show: true,
             decimals: 0,
@@ -90,7 +90,7 @@ local pieChartPanel = grafana.pieChartPanel;
         'All Room Resources Over Time',
         datasource='VictoriaMetrics',
         description='All resources in selected rooms over time (no limit)',
-        format='none',
+        format='short',
         legend_show=true,
         legend_values=true,
         legend_min=false,
@@ -112,7 +112,7 @@ local pieChartPanel = grafana.pieChartPanel;
       ) + {
         yaxes: [
           {
-            format: 'none',
+            format: 'short',
             label: 'Quantity',
             show: true,
             decimals: 0,
