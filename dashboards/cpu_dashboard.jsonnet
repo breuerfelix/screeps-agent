@@ -49,7 +49,9 @@ local cpuY = cpuRowY + 1;
 local cpuHeight = 12;
 local cpuPerCreepY = cpuY + cpuHeight;
 local cpuPerCreepHeight = 12;
-local energyRowY = cpuPerCreepY + cpuPerCreepHeight;
+local cpuMemoryY = cpuPerCreepY + cpuPerCreepHeight;
+local cpuMemoryHeight = 12;
+local energyRowY = cpuMemoryY + cpuMemoryHeight;
 local energyY = energyRowY + 1;
 local energyHeight = 12;
 local energyTotalHeight = energyHeight * 4;  // Energy section now has 4 rows
@@ -364,6 +366,65 @@ dashboard.new(
     y: cpuPerCreepY,
     w: 12,
     h: cpuPerCreepHeight,
+  }
+)
+// === MEMORY USAGE PANEL ===
+.addPanel(
+  graphPanel.new(
+    'Memory Usage',
+    datasource='VictoriaMetrics',
+    description='Memory usage over time',
+    format='bytes',
+    legend_show=true,
+    legend_values=true,
+    legend_min=true,
+    legend_max=true,
+    legend_avg=true,
+    legend_current=true,
+    legend_alignAsTable=true,
+    legend_rightSide=false,
+    staircase=true,
+  )
+  .addTarget(
+    prometheus.target(
+      'screeps_memory_used{shard="$shard"}',
+      legendFormat='Memory Used',
+    )
+  )
+  .addTarget(
+    prometheus.target(
+      'avg_over_time(screeps_memory_used{shard="$shard"}[$__range])',
+      legendFormat='Memory Used (avg)',
+    )
+  )
+  .addSeriesOverride({
+    alias: 'Memory Used',
+    color: 'blue',
+    fill: 1,
+    linewidth: 1,
+  })
+  .addSeriesOverride({
+    alias: 'Memory Used (avg)',
+    color: 'yellow',
+  } + styles.avgLine) + {
+    yaxes: [
+      {
+        format: 'bytes',
+        label: 'Memory',
+        show: true,
+        decimals: 0,
+        min: 0,
+      },
+      {
+        show: false,
+      },
+    ],
+  },
+  gridPos={
+    x: 0,
+    y: cpuMemoryY,
+    w: 24,
+    h: cpuMemoryHeight,
   }
 )
 // === ENERGY METRICS ROW ===
