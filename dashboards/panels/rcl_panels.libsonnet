@@ -85,7 +85,7 @@ local row = grafana.row;
 
       // Time to Next RCL
       singlestat.new(
-        'Time to Next RCL (weeks)',
+        'Time to Next RCL (days)',
         datasource='VictoriaMetrics',
         format='none',
         valueName='current',
@@ -94,7 +94,7 @@ local row = grafana.row;
       )
       .addTarget(
         prometheus.target(
-          '(screeps_room_rcl_progressTotal{shard="$shard", room="$room_upgrading"} - screeps_room_rcl_progress{shard="$shard", room="$room_upgrading"}) / (deriv(screeps_room_rcl_progress{shard="$shard", room="$room_upgrading"}[1h]) * 3600 * 24 * 7)',
+          '(screeps_room_rcl_progressTotal{shard="$shard", room="$room_upgrading"} - screeps_room_rcl_progress{shard="$shard", room="$room_upgrading"}) / (deriv(screeps_room_rcl_progress{shard="$shard", room="$room_upgrading"}[1h]) * 3600 * 24)',
         )
       ) + {
         gridPos: {
