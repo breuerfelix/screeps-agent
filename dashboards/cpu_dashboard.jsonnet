@@ -423,7 +423,92 @@ dashboard.new(
   gridPos={
     x: 0,
     y: cpuMemoryY,
-    w: 24,
+    w: 12,
+    h: cpuMemoryHeight,
+  }
+)
+// === CPU HEAP PANEL ===
+.addPanel(
+  graphPanel.new(
+    'CPU Heap',
+    datasource='VictoriaMetrics',
+    description='CPU heap memory statistics',
+    format='bytes',
+    legend_show=true,
+    legend_values=true,
+    legend_min=true,
+    legend_max=true,
+    legend_avg=true,
+    legend_current=true,
+    legend_alignAsTable=true,
+    legend_rightSide=false,
+    staircase=true,
+  )
+  .addTarget(
+    prometheus.target(
+      'screeps_cpu_heapStatistics_total_heap_size{shard="$shard"}',
+      legendFormat='Total Heap Size',
+    )
+  )
+  .addTarget(
+    prometheus.target(
+      'screeps_cpu_heapStatistics_used_heap_size{shard="$shard"}',
+      legendFormat='Used Heap Size',
+    )
+  )
+  .addTarget(
+    prometheus.target(
+      'screeps_cpu_heapStatistics_heap_size_limit{shard="$shard"}',
+      legendFormat='Heap Size Limit',
+    )
+  )
+  .addTarget(
+    prometheus.target(
+      'screeps_cpu_heapStatistics_externally_allocated_size{shard="$shard"}',
+      legendFormat='Externally Allocated',
+    )
+  )
+  .addSeriesOverride({
+    alias: 'Used Heap Size',
+    color: 'red',
+    fill: 1,
+    linewidth: 1,
+  })
+  .addSeriesOverride({
+    alias: 'Total Heap Size',
+    color: 'orange',
+    fill: 0,
+    linewidth: 1,
+  })
+  .addSeriesOverride({
+    alias: 'Heap Size Limit',
+    color: 'blue',
+    fill: 0,
+    linewidth: 2,
+  })
+  .addSeriesOverride({
+    alias: 'Externally Allocated',
+    color: 'green',
+    fill: 0,
+    linewidth: 1,
+  }) + {
+    yaxes: [
+      {
+        format: 'bytes',
+        label: 'Heap Size',
+        show: true,
+        decimals: 0,
+        min: 0,
+      },
+      {
+        show: false,
+      },
+    ],
+  },
+  gridPos={
+    x: 12,
+    y: cpuMemoryY,
+    w: 12,
     h: cpuMemoryHeight,
   }
 )
