@@ -176,7 +176,7 @@ local row = grafana.row;
 
       // Time to Next GPL
       singlestat.new(
-        'Time to Next GPL (weeks)',
+        'Time to Next GPL (days)',
         datasource='VictoriaMetrics',
         format='none',
         valueName='current',
@@ -185,7 +185,7 @@ local row = grafana.row;
       )
       .addTarget(
         prometheus.target(
-          '(screeps_gpl_progressTotal{shard="$shard"} - screeps_gpl_progress{shard="$shard"}) / (deriv(screeps_gpl_progress{shard="$shard"}[1h]) * 3600 * 24 * 7)',
+          '(screeps_gpl_progressTotal{shard="$shard"} - screeps_gpl_progress{shard="$shard"}) / (deriv(screeps_gpl_progress{shard="$shard"}[1h]) * 3600 * 24)',
         )
       ) + {
         gridPos: {
