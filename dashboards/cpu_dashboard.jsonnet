@@ -192,6 +192,9 @@ dashboard.new(
     alias: 'CPU Bucket',
     yaxis: 2,
     fill: 0,
+    fillBelowTo: null,
+    linewidth: 1,
+    color: 'rgba(255, 152, 48, 0.3)',
   })
   {
     yaxes: [
