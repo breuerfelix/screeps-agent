@@ -7,7 +7,8 @@ local template = grafana.template;
 local row = grafana.row;
 
 // Import panel modules
-local gclGplPanels = import 'panels/gcl_gpl_panels.libsonnet';
+local gclPanels = import 'panels/gcl_panels.libsonnet';
+local gplPanels = import 'panels/gpl_panels.libsonnet';
 local rclPanels = import 'panels/rcl_panels.libsonnet';
 local creepPanels = import 'panels/creep_panels.libsonnet';
 local assetPanels = import 'panels/asset_panels.libsonnet';
@@ -61,10 +62,13 @@ local creepsObj = creepPanels.new(creepsY);
 local assetsRowY = creepsY + creepsObj.rowHeight;
 local assetsY = assetsRowY + 1;
 local assetsObj = assetPanels.new(assetsY);
-local gclGplRowY = assetsY + assetsObj.rowHeight;
-local gclGplY = gclGplRowY + 1;
-local gclGplObj = gclGplPanels.new(gclGplY);
-local rclRowY = gclGplY + gclGplObj.rowHeight;
+local gplRowY = assetsY + assetsObj.rowHeight;
+local gplY = gplRowY + 1;
+local gplObj = gplPanels.new(gplY);
+local gclRowY = gplY + gplObj.rowHeight;
+local gclY = gclRowY + 1;
+local gclObj = gclPanels.new(gclY);
+local rclRowY = gclY + gclObj.rowHeight;
 local rclY = rclRowY + 1;
 
 dashboard.new(
@@ -912,18 +916,31 @@ dashboard.new(
   }
 )
 .addPanels(assetsObj.panels)
-// === GCL & GPL ROW ===
+// === GPL ROW ===
 .addPanel(
   row.new(
-    title='Global Control Level (GCL) & Global Power Level (GPL)',
+    title='Global Power Level (GPL) & Power Resources',
   ),
   gridPos={
     x: 0,
-    y: gclGplRowY,
+    y: gplRowY,
     w: 24,
     h: 1,
   }
 )
-.addPanels(gclGplObj.panels)
+.addPanels(gplObj.panels)
+// === GCL ROW ===
+.addPanel(
+  row.new(
+    title='Global Control Level (GCL)',
+  ),
+  gridPos={
+    x: 0,
+    y: gclRowY,
+    w: 24,
+    h: 1,
+  }
+)
+.addPanels(gclObj.panels)
 // === RCL ROWS (one per room) ===
 .addPanels(rclPanels.new(rclRowY).panels)
