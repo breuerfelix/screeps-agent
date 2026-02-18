@@ -15,76 +15,6 @@ local pieChartPanel = grafana.pieChartPanel;
     local panelWidth = 24,
     
     panels: [
-      // Energy per room - stacked time series
-      graphPanel.new(
-        'Energy per Room Over Time',
-        datasource='VictoriaMetrics',
-        description='Energy storage by room over time (stacked)',
-        format='short',
-        legend_show=true,
-        legend_values=true,
-        legend_min=false,
-        legend_max=false,
-        legend_avg=true,
-        legend_current=true,
-        legend_alignAsTable=true,
-        legend_rightSide=true,
-        stack=true,
-        fill=2,
-        linewidth=1,
-        staircase=true,
-      )
-      .addTarget(
-        prometheus.target(
-          'sum by (room) (screeps_room_assets{shard="$shard", room=~"$room", resource="energy"})',
-          legendFormat='{{room}}',
-        )
-      ) + {
-        yaxes: [
-          {
-            format: 'short',
-            label: 'Energy',
-            show: true,
-            decimals: 0,
-            min: 0,
-          },
-          {
-            show: false,
-          },
-        ],
-        gridPos: {
-          x: 0,
-          y: startY,
-          w: 16,
-          h: panelHeight,
-        },
-      },
-      
-      // Energy distribution pie chart
-      pieChartPanel.new(
-        'Energy Distribution by Room',
-        datasource='VictoriaMetrics',
-        description='Current energy distribution across rooms',
-        pieType='pie',
-        showLegend=true,
-        showLegendPercentage=true,
-        legendType='Right side',
-      )
-      .addTarget(
-        prometheus.target(
-          'sum by (room) (screeps_room_assets{shard="$shard", room=~"$room", resource="energy"} > 0)',
-          legendFormat='{{room}}',
-          instant=true,
-        )
-      ) + {
-        gridPos: {
-          x: 16,
-          y: startY,
-          w: 8,
-          h: panelHeight,
-        },
-      },
-      
       // All resources stacked time series (ALL resources)
       graphPanel.new(
         'All Room Resources Over Time',
@@ -124,7 +54,7 @@ local pieChartPanel = grafana.pieChartPanel;
         ],
         gridPos: {
           x: 0,
-          y: startY + panelHeight,
+          y: startY,
           w: 16,
           h: panelHeight,
         },
@@ -149,13 +79,13 @@ local pieChartPanel = grafana.pieChartPanel;
       ) + {
         gridPos: {
           x: 16,
-          y: startY + panelHeight,
+          y: startY,
           w: 8,
           h: panelHeight,
         },
       },
     ],
     
-    rowHeight: panelHeight * 2,  // Two rows of panels
+    rowHeight: panelHeight,  // One row of panels
   },
 }

@@ -12,6 +12,7 @@ local gplPanels = import 'panels/gpl_panels.libsonnet';
 local rclPanels = import 'panels/rcl_panels.libsonnet';
 local creepPanels = import 'panels/creep_panels.libsonnet';
 local assetPanels = import 'panels/asset_panels.libsonnet';
+local energyPanels = import 'panels/energy_panels.libsonnet';
 
 // Reusable style objects
 local styles = {
@@ -62,7 +63,10 @@ local creepsObj = creepPanels.new(creepsY);
 local assetsRowY = creepsY + creepsObj.rowHeight;
 local assetsY = assetsRowY + 1;
 local assetsObj = assetPanels.new(assetsY);
-local gplRowY = assetsY + assetsObj.rowHeight;
+local energyResourceRowY = assetsY + assetsObj.rowHeight;
+local energyResourceY = energyResourceRowY + 1;
+local energyResourceObj = energyPanels.new(energyResourceY);
+local gplRowY = energyResourceY + energyResourceObj.rowHeight;
 local gplY = gplRowY + 1;
 local gplObj = gplPanels.new(gplY);
 local gclRowY = gplY + gplObj.rowHeight;
@@ -916,6 +920,19 @@ dashboard.new(
   }
 )
 .addPanels(assetsObj.panels)
+// === ENERGY RESOURCES ROW ===
+.addPanel(
+  row.new(
+    title='Energy & Battery Resources',
+  ),
+  gridPos={
+    x: 0,
+    y: energyResourceRowY,
+    w: 24,
+    h: 1,
+  }
+)
+.addPanels(energyResourceObj.panels)
 // === GPL ROW ===
 .addPanel(
   row.new(
