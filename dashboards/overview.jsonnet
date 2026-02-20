@@ -78,7 +78,7 @@ local rclY = rclRowY + 1;
 dashboard.new(
   'Overview',
   description='CPU, Energy, GCL, GPL, and RCL monitoring',
-  time_from='now-6h',
+  time_from='now-2d',
   refresh='30s',
   tags=['screeps', 'cpu'],
   editable=true,

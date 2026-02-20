@@ -3,10 +3,11 @@
 # Grafana configuration
 GRAFANA_URL="http://192.168.178.13:3001"
 GRAFANA_API_KEY=""  # Set this or use admin:admin below
-DASHBOARD_FILE="overview.json"
+DASHBOARD_NAME="${1:-overview}"  # Use first argument as dashboard name, default to overview
+DASHBOARD_FILE="${DASHBOARD_NAME}.json"
 
 # Upload the dashboard (with overwrite=true, it will update if UID matches)
-echo "📤 Uploading dashboard..."
+echo "📤 Uploading dashboard: $DASHBOARD_NAME..."
 RESPONSE=$(curl -s -X POST "$GRAFANA_URL/api/dashboards/db" \
   -u admin:jamo \
   -H "Content-Type: application/json" \
