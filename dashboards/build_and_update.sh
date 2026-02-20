@@ -6,7 +6,7 @@
 set -e  # Exit on error
 
 echo "🔨 Compiling Jsonnet to JSON..."
-jsonnet -J grafonnet-lib cpu_dashboard.jsonnet -o cpu_dashboard.json
+jsonnet -J grafonnet-lib overview.jsonnet -o overview.json
 
 echo "📤 Uploading to Grafana..."
 ./update_dashboard.sh

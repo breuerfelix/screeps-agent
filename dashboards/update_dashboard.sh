@@ -3,7 +3,7 @@
 # Grafana configuration
 GRAFANA_URL="http://192.168.178.13:3001"
 GRAFANA_API_KEY=""  # Set this or use admin:admin below
-DASHBOARD_FILE="cpu_dashboard.json"
+DASHBOARD_FILE="overview.json"
 
 # Upload the dashboard (with overwrite=true, it will update if UID matches)
 echo "📤 Uploading dashboard..."
