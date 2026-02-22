@@ -5,11 +5,14 @@ local row = grafana.row;
 
 // Import panel modules
 local assetPanels = import 'panels/asset_panels.libsonnet';
+local mineralPanels = import 'panels/minerals_panels.libsonnet';
 
 // Calculate Y positions
 local assetsRowY = 0;
 local assetsY = assetsRowY + 1;
 local assetsObj = assetPanels.new(assetsY);
+local tierPanelsY = assetsY + assetsObj.rowHeight;
+local tierPanelsObj = mineralPanels.newTierPanels(tierPanelsY);
 
 dashboard.new(
   'Assets',
@@ -59,3 +62,4 @@ dashboard.new(
   }
 )
 .addPanels(assetsObj.panels)
+.addPanels(tierPanelsObj.panels)
