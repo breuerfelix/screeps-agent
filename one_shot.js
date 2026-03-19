@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+require("dotenv").config();
+
 const { fetchSegments } = require("./fetch_segments");
 const { parseSegments } = require("./segment_parser");
 const { extractMetrics, pushToVictoriaMetrics } = require("./ingest_segment");
@@ -40,7 +42,7 @@ async function processShards(shards) {
 }
 
 async function main() {
-  const shards = ["shard3"];
+  const shards = ["shardSeason"];
 
   console.log("Starting data collection for shards:", shards.join(", "));
 

@@ -1,14 +1,18 @@
 #!/usr/bin/env node
 
+require("dotenv").config();
+
 const axios = require("axios");
 
 const SCREEPS_TOKEN = process.env.SCREEPS_TOKEN;
-const SCREEPS_API_URL = "https://screeps.com/api/user/memory-segment";
 
 async function fetchSegments(shard) {
   const segments = Array.from({ length: 91 }, (_, i) => i).join(",");
+  
+  const urlPrefix = shard === "shardSeason" ? "season/" : "";
+  const apiUrl = `https://screeps.com/${urlPrefix}api/user/memory-segment`;
 
-  const response = await axios.get(SCREEPS_API_URL, {
+  const response = await axios.get(apiUrl, {
     headers: {
       "X-Token": SCREEPS_TOKEN,
     },

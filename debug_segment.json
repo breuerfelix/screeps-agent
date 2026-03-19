@@ -1,77 +1,35 @@
 {
   "segmentId": "0",
   "data": {
-    "cpu": {
-      "usage": {
-        "E6N28": {
-          "init": 0.89858
-        },
-        "E8N26": {
-          "init": 0.57044
-        }
-      },
-      "heapStatistics": {
-        "total_heap_size": 118657024,
-        "total_heap_size_executable": 3145728,
-        "total_physical_size": 115277736,
-        "total_available_size": 557613608,
-        "used_heap_size": 57828168,
-        "heap_size_limit": 652562061,
-        "malloced_memory": 938640,
-        "peak_malloced_memory": 6369624,
-        "does_zap_garbage": 0,
-        "externally_allocated_size": 41390638
-      },
-      "limit": 20,
-      "bucket": 2139,
-      "getUsed": 15.69397
-    },
     "colonies": {
-      "E8N26": {
+      "E38N15": {
         "transportNetwork": {
           "downtime": null
         },
         "upgradeSite": {
-          "downtime": 0.99999
-        },
-        "infestedFactory": {
-          "avgUsage": 0
-        },
-        "evolutionChamber": {
-          "avgUsage": 0
+          "downtime": 0.11662
         },
         "hatchery": {
-          "uptime": 0.07958,
-          "overload": 0.99855
+          "uptime": 0.49249,
+          "overload": 0.40828
         },
         "storage": {
           "energy": 0
         },
         "rcl": {
-          "level": 8,
-          "progress": 0
+          "level": 4,
+          "progress": 2754,
+          "progressTotal": 405000
         },
         "miningSites": {
-          "avgDowntime": 0,
-          "avgUsage": 0.632,
-          "energyInPerTick": 0
-        },
-        "energyUsage": {
-          "mined": 8.29905,
-          "spawn": 9.47278,
-          "build": 9.49931,
-          "repair": 0.2337,
-          "upgrade": 7.57482,
-          "factory": 6.05008,
-          "powerspawn": 2.45175,
-          "lab": 0,
-          "renew": 0
+          "avgDowntime": 0.25176,
+          "avgUsage": 0.60666
         },
         "instantEnergyUsage": {
-          "mined": 4,
+          "mined": 24,
           "spawn": 0,
           "build": 0,
-          "repair": 0,
+          "repair": -6,
           "upgrade": 0,
           "factory": 0,
           "powerspawn": 0,
@@ -79,225 +37,49 @@
           "renew": 0
         },
         "assets": {
-          "KO": 51029,
-          "UH2O": 24109,
-          "KHO2": 24091,
-          "ZHO2": 23740,
-          "XUH2O": 51096,
-          "ZO": 50828,
-          "ZK": 4960,
-          "XLHO2": 50712,
-          "XKHO2": 54000,
-          "XZHO2": 59255,
-          "LH2O": 20726,
-          "LO": 51065,
-          "LHO2": 24629,
-          "GHO2": 23380,
-          "ZH2O": 24722,
-          "XZH2O": 49974,
-          "XGHO2": 55557,
-          "KH2O": 23312,
-          "XLH2O": 59620,
-          "XKH2O": 50000,
-          "KH": 3187,
-          "GO": 50300,
-          "oxidant": 1000,
-          "purifier": 1000,
-          "zynthium_bar": 1000,
-          "O": 6500,
-          "U": 37,
-          "K": 6280,
-          "Z": 6980,
-          "X": 2022,
-          "L": 7000,
-          "UH": 1583,
-          "ZH": 1600,
-          "UL": 247,
-          "G": 236,
-          "GH": 159,
-          "GH2O": 175,
-          "XGH2O": 335,
-          "mist": 4240,
-          "energy": 19900,
+          "energy": 250,
           "power": 0,
           "H": 0,
+          "O": 0,
+          "U": 0,
+          "K": 0,
+          "L": 0,
+          "Z": 0,
+          "X": 0,
+          "G": 0,
           "OH": 0,
-          "UO": 0,
-          "LH": 0,
-          "UHO2": 0,
-          "XUHO2": 0,
-          "ops": 0,
-          "silicon": 0,
-          "metal": 0,
-          "biomass": 0,
-          "utrium_bar": 0,
-          "lemergium_bar": 0,
-          "keanium_bar": 0,
-          "ghodium_melt": 0,
-          "reductant": 0,
-          "battery": 31,
-          "composite": 0,
-          "crystal": 0,
-          "liquid": 0,
-          "wire": 0,
-          "switch": 0,
-          "transistor": 0,
-          "microchip": 0,
-          "circuit": 0,
-          "device": 0,
-          "cell": 0,
-          "phlegm": 0,
-          "tissue": 0,
-          "muscle": 0,
-          "organoid": 0,
-          "organism": 0,
-          "alloy": 0,
-          "tube": 0,
-          "fixtures": 0,
-          "frame": 0,
-          "hydraulics": 0,
-          "machine": 0,
-          "condensate": 0,
-          "concentrate": 0,
-          "extract": 0,
-          "spirit": 0,
-          "emanation": 0,
-          "essence": 0
-        },
-        "defcon": 0,
-        "threatLevel": 0.00017,
-        "avgBarrierHits": 20978516.84615,
-        "maxBarrierHits": 21000000,
-        "creeps": {
-          "queen": {
-            "current": 0,
-            "needed": 2
-          },
-          "manager": {
-            "current": 0,
-            "needed": 1
-          },
-          "drone": {
-            "current": 0,
-            "needed": 2
-          },
-          "worker": {
-            "current": 0,
-            "needed": 0
-          },
-          "transport": {
-            "current": 0,
-            "needed": 0
-          },
-          "upgrader": {
-            "current": 0,
-            "needed": 1
-          },
-          "gatherer": {
-            "current": 0,
-            "needed": 3
-          }
-        }
-      },
-      "E6N28": {
-        "transportNetwork": {
-          "downtime": null
-        },
-        "upgradeSite": {
-          "downtime": 0.99999
-        },
-        "infestedFactory": {
-          "avgUsage": 0
-        },
-        "evolutionChamber": {
-          "avgUsage": 0
-        },
-        "hatchery": {
-          "uptime": 0.17391,
-          "overload": 0.80203
-        },
-        "storage": {
-          "energy": 0
-        },
-        "rcl": {
-          "level": 8,
-          "progress": 0
-        },
-        "miningSites": {
-          "avgDowntime": 0,
-          "avgUsage": 1,
-          "energyInPerTick": 23.99999
-        },
-        "energyUsage": {
-          "mined": 20.68529,
-          "spawn": 14.88363,
-          "build": 9.05647,
-          "repair": 0.60128,
-          "upgrade": 15.46074,
-          "factory": 5.72555,
-          "powerspawn": 0,
-          "lab": 0,
-          "renew": 0
-        },
-        "instantEnergyUsage": {
-          "mined": 4,
-          "spawn": 0,
-          "build": 0,
-          "repair": 0,
-          "upgrade": 0,
-          "factory": 0,
-          "powerspawn": 0,
-          "lab": 0,
-          "renew": 0
-        },
-        "assets": {
-          "O": 16231,
-          "LO": 47826,
-          "LHO2": 14837,
-          "KO": 53549,
-          "ZO": 57152,
-          "ZK": 7357,
-          "UH2O": 15282,
-          "KHO2": 15255,
-          "ZH": 2265,
-          "ZHO2": 23599,
-          "XUH2O": 51131,
-          "XLHO2": 52133,
-          "XKHO2": 51158,
-          "KH2O": 13324,
-          "XZHO2": 52840,
-          "ZH2O": 13380,
-          "XZH2O": 53977,
-          "XKH2O": 50800,
-          "XGHO2": 52248,
-          "XLH2O": 54391,
-          "GHO2": 16448,
-          "G": 4800,
-          "LH2O": 13542,
-          "GO": 53601,
-          "oxidant": 1000,
-          "purifier": 1000,
-          "zynthium_bar": 1000,
-          "energy": 20698,
-          "Z": 1651,
-          "X": 2000,
-          "L": 5092,
-          "H": 480,
-          "OH": 495,
-          "K": 222,
-          "U": 3,
-          "KH": 210,
-          "LH": 1561,
-          "UL": 453,
-          "XGH2O": 146,
-          "battery": 39,
-          "power": 0,
+          "ZK": 0,
+          "UL": 0,
           "UH": 0,
           "UO": 0,
+          "KH": 0,
+          "KO": 0,
+          "LH": 0,
+          "LO": 0,
+          "ZH": 0,
+          "ZO": 0,
           "GH": 0,
+          "GO": 0,
+          "UH2O": 0,
           "UHO2": 0,
+          "KH2O": 0,
+          "KHO2": 0,
+          "LH2O": 0,
+          "LHO2": 0,
+          "ZH2O": 0,
+          "ZHO2": 0,
           "GH2O": 0,
+          "GHO2": 0,
+          "XUH2O": 0,
           "XUHO2": 0,
+          "XKH2O": 0,
+          "XKHO2": 0,
+          "XLH2O": 0,
+          "XLHO2": 0,
+          "XZH2O": 0,
+          "XZHO2": 0,
+          "XGH2O": 0,
+          "XGHO2": 0,
           "ops": 0,
           "silicon": 0,
           "metal": 0,
@@ -305,9 +87,13 @@
           "mist": 0,
           "utrium_bar": 0,
           "lemergium_bar": 0,
+          "zynthium_bar": 0,
           "keanium_bar": 0,
           "ghodium_melt": 0,
+          "oxidant": 0,
           "reductant": 0,
+          "purifier": 0,
+          "battery": 0,
           "composite": 0,
           "crystal": 0,
           "liquid": 0,
@@ -337,671 +123,88 @@
           "essence": 0
         },
         "defcon": 0,
-        "threatLevel": 0.00003,
-        "avgBarrierHits": 20987632.6923,
-        "maxBarrierHits": 21000000,
+        "threatLevel": 0,
+        "avgBarrierHits": 78467.95652,
+        "maxBarrierHits": 50000,
         "creeps": {
-          "queen": {
-            "current": 2,
-            "needed": 2
-          },
-          "manager": {
-            "current": 1,
-            "needed": 1
-          },
-          "drone": {
-            "current": 2,
-            "needed": 2
-          },
-          "worker": {
-            "current": 1,
-            "needed": 1
-          },
-          "transport": {
+          "filler": {
             "current": 0,
             "needed": 0
+          },
+          "queen": {
+            "current": 1,
+            "needed": 1
+          },
+          "changeling": {
+            "current": 0,
+            "needed": 0
+          },
+          "drone": {
+            "current": 4,
+            "needed": 6
+          },
+          "worker": {
+            "current": 3,
+            "needed": 3
+          },
+          "transport": {
+            "current": 2,
+            "needed": 1
           },
           "upgrader": {
             "current": 1,
             "needed": 1
           },
-          "gatherer": {
-            "current": 1,
-            "needed": 1
+          "infestor": {
+            "current": 3,
+            "needed": 3
           }
         }
       }
+    },
+    "time": 25298,
+    "unixTimestamp": 1772438704231,
+    "cpu": {
+      "heapStatistics": {
+        "total_heap_size": 63873024,
+        "total_heap_size_executable": 5242880,
+        "total_physical_size": 62160896,
+        "total_available_size": 547602280,
+        "used_heap_size": 40565120,
+        "heap_size_limit": 588251136,
+        "malloced_memory": 762952,
+        "peak_malloced_memory": 12219344,
+        "does_zap_garbage": 0,
+        "externally_allocated_size": 29882044
+      },
+      "limit": 100,
+      "bucket": 10000,
+      "getUsed": 8.50895
     },
     "gcl": {
-      "progress": 13615505.13125,
-      "progressTotal": 73327156.22519,
-      "level": 12
+      "level": 1,
+      "progress": 182954,
+      "progressTotal": 1000000
     },
     "gpl": {
-      "progress": 9520,
-      "progressTotal": 23000,
-      "level": 11
+      "level": 0,
+      "progress": 0,
+      "progressTotal": 1000
     },
     "memory": {
-      "used": 101994
+      "used": 31547
     },
     "persistent": {
-      "empireAge": 73663161,
-      "build": 98,
-      "time": 73668685,
-      "lastGlobalReset": 73668598,
-      "lastMemoryReset": 73668598,
-      "globalAge": 89,
-      "avgCPU": 18.28365,
-      "lastBucket": 2141,
-      "avgBucketDelta": 1.16137,
+      "time": 25298,
+      "build": 1,
+      "empireAge": 25292,
+      "lastGlobalReset": 1,
+      "lastMemoryReset": 1,
+      "globalAge": 25298,
       "isProfiling": 0,
-      "trader": {
-        "credits": 4.9718,
-        "bought": {
-          "L": {
-            "amount": 11136,
-            "credits": 1801045.04699
-          },
-          "Z": {
-            "amount": 4849,
-            "credits": 8083.283
-          },
-          "K": {
-            "amount": 222,
-            "credits": 157.62
-          },
-          "battery": {
-            "amount": 39,
-            "credits": 6440.07
-          },
-          "X": {
-            "amount": 19,
-            "credits": 86.184
-          }
-        },
-        "sold": {
-          "energy": {
-            "amount": 70802,
-            "credits": 1234170.683
-          },
-          "O": {
-            "amount": 5404,
-            "credits": 83762
-          }
-        },
-        "prices": {
-          "H": {
-            "avg": 61.893
-          },
-          "energy": {
-            "avg": 7.984
-          },
-          "pixel": {
-            "avg": 44482.602
-          },
-          "L": {
-            "avg": 149.712
-          },
-          "X": {
-            "avg": 47.937
-          },
-          "U": {
-            "avg": 24.222
-          },
-          "K": {
-            "avg": 17.991
-          },
-          "reductant": {
-            "avg": 392.312
-          },
-          "mist": {
-            "avg": 1400
-          },
-          "O": {
-            "avg": 14.513
-          },
-          "ZK": {
-            "avg": 35.212
-          },
-          "Z": {
-            "avg": 3.763
-          },
-          "ZH2O": {
-            "avg": 164.975
-          },
-          "ops": {
-            "avg": 21.149
-          },
-          "zynthium_bar": {
-            "avg": 77.905
-          },
-          "phlegm": {
-            "avg": 689597.831
-          },
-          "purifier": {
-            "avg": 792.938
-          },
-          "metal": {
-            "avg": 606.075
-          },
-          "battery": {
-            "avg": 153.201
-          },
-          "power": {
-            "avg": 2029.8
-          },
-          "wire": {
-            "avg": 8347.85
-          },
-          "GH": {
-            "avg": 387.099
-          },
-          "essence": {
-            "avg": 42295672.594
-          },
-          "utrium_bar": {
-            "avg": 313.809
-          },
-          "liquid": {
-            "avg": 122.458
-          },
-          "device": {
-            "avg": 12973908.077
-          },
-          "ghodium_melt": {
-            "avg": 2033.257
-          },
-          "microchip": {
-            "avg": 9594415.741
-          },
-          "LH": {
-            "avg": 284.282
-          },
-          "G": {
-            "avg": 215.855
-          },
-          "crystal": {
-            "avg": 2924.484
-          },
-          "XUH2O": {
-            "avg": 259.66
-          },
-          "concentrate": {
-            "avg": 314055.991
-          },
-          "spirit": {
-            "avg": 7083073.703
-          },
-          "UH": {
-            "avg": 46.597
-          },
-          "condensate": {
-            "avg": 28452.63
-          },
-          "organism": {
-            "avg": 31786817.003
-          },
-          "alloy": {
-            "avg": 2153.231
-          },
-          "organoid": {
-            "avg": 32765421.997
-          },
-          "tissue": {
-            "avg": 3365991.609
-          },
-          "emanation": {
-            "avg": 15969842.085
-          },
-          "composite": {
-            "avg": 1764.536
-          },
-          "switch": {
-            "avg": 112874.285
-          },
-          "ZH": {
-            "avg": 9.5
-          },
-          "oxidant": {
-            "avg": 114.503
-          },
-          "XGH2O": {
-            "avg": 1524.926
-          },
-          "GO": {
-            "avg": 113.428
-          },
-          "lemergium_bar": {
-            "avg": 903.1
-          },
-          "LO": {
-            "avg": 186.85
-          },
-          "KO": {
-            "avg": 77.639
-          },
-          "muscle": {
-            "avg": 13563788.428
-          },
-          "cell": {
-            "avg": 39640.062
-          },
-          "hydraulics": {
-            "avg": 5498850.663
-          },
-          "fixtures": {
-            "avg": 581858.987
-          },
-          "UO": {
-            "avg": 48.991
-          },
-          "ZO": {
-            "avg": 8.851
-          },
-          "machine": {
-            "avg": 11529660.845
-          },
-          "XLH2O": {
-            "avg": 1376.825
-          },
-          "keanium_bar": {
-            "avg": 230.896
-          },
-          "silicon": {
-            "avg": 1250
-          },
-          "tube": {
-            "avg": 94001.049
-          },
-          "XLHO2": {
-            "avg": 366.657
-          },
-          "UL": {
-            "avg": 57.916
-          },
-          "biomass": {
-            "avg": 3005.842
-          },
-          "transistor": {
-            "avg": 2314514.566
-          },
-          "KH": {
-            "avg": 100
-          },
-          "extract": {
-            "avg": 2380489.404
-          },
-          "XGHO2": {
-            "avg": 417.687
-          },
-          "frame": {
-            "avg": 1708926.782
-          },
-          "XKH2O": {
-            "avg": 454.378
-          },
-          "XUHO2": {
-            "avg": 236.99
-          },
-          "cpuUnlock": {
-            "avg": 794196912.045
-          },
-          "GHO2": {
-            "avg": 333.692
-          },
-          "XKHO2": {
-            "avg": 820.365
-          },
-          "KHO2": {
-            "avg": 173.665
-          },
-          "circuit": {
-            "avg": 23248660.175
-          },
-          "GH2O": {
-            "avg": 3139.66
-          },
-          "UHO2": {
-            "avg": 221.545
-          },
-          "LHO2": {
-            "avg": 434.746
-          },
-          "ZHO2": {
-            "avg": 79.213
-          },
-          "OH": {
-            "avg": 81.836
-          },
-          "UH2O": {
-            "avg": 242.002
-          },
-          "XZH2O": {
-            "avg": 770.158
-          },
-          "KH2O": {
-            "avg": 724.871
-          },
-          "LH2O": {
-            "avg": 2863.366
-          },
-          "XZHO2": {
-            "avg": 447.286
-          }
-        }
-      },
-      "terminalNetwork": {
-        "assets": {
-          "O": 22731,
-          "LO": 98891,
-          "LHO2": 39466,
-          "KO": 104578,
-          "ZO": 107980,
-          "ZK": 12317,
-          "UH2O": 39391,
-          "KHO2": 39346,
-          "ZH": 3865,
-          "ZHO2": 47339,
-          "XUH2O": 102227,
-          "XLHO2": 102845,
-          "XKHO2": 105158,
-          "KH2O": 36636,
-          "XZHO2": 112095,
-          "ZH2O": 38102,
-          "XZH2O": 103951,
-          "XKH2O": 100800,
-          "XGHO2": 107805,
-          "XLH2O": 114011,
-          "GHO2": 39828,
-          "G": 5036,
-          "LH2O": 34268,
-          "GO": 103901,
-          "oxidant": 2000,
-          "purifier": 2000,
-          "zynthium_bar": 2000,
-          "energy": 40598,
-          "Z": 8631,
-          "X": 4022,
-          "L": 12092,
-          "H": 480,
-          "OH": 495,
-          "K": 6502,
-          "U": 40,
-          "KH": 3397,
-          "LH": 1561,
-          "UL": 700,
-          "XGH2O": 481,
-          "battery": 70,
-          "power": 0,
-          "UH": 1583,
-          "UO": 0,
-          "GH": 159,
-          "UHO2": 0,
-          "GH2O": 175,
-          "XUHO2": 0,
-          "ops": 0,
-          "silicon": 0,
-          "metal": 0,
-          "biomass": 0,
-          "mist": 4240,
-          "utrium_bar": 0,
-          "lemergium_bar": 0,
-          "keanium_bar": 0,
-          "ghodium_melt": 0,
-          "reductant": 0,
-          "composite": 0,
-          "crystal": 0,
-          "liquid": 0,
-          "wire": 0,
-          "switch": 0,
-          "transistor": 0,
-          "microchip": 0,
-          "circuit": 0,
-          "device": 0,
-          "cell": 0,
-          "phlegm": 0,
-          "tissue": 0,
-          "muscle": 0,
-          "organoid": 0,
-          "organism": 0,
-          "alloy": 0,
-          "tube": 0,
-          "fixtures": 0,
-          "frame": 0,
-          "hydraulics": 0,
-          "machine": 0,
-          "condensate": 0,
-          "concentrate": 0,
-          "extract": 0,
-          "spirit": 0,
-          "emanation": 0,
-          "essence": 0
-        },
-        "fractionalEnergyTransferCost": 0.24814,
-        "incomingResources": {
-          "O": {
-            "E8N26": 7500
-          },
-          "ZK": {
-            "E6N28": 3000
-          },
-          "energy": {
-            "E8N26": 12843
-          }
-        },
-        "outgoingResources": {
-          "O": {
-            "E6N28": 7500
-          },
-          "ZK": {
-            "E8N26": 3000
-          },
-          "energy": {
-            "E6N28": 12843
-          }
-        },
-        "sendCosts": {
-          "E6N28": 1314,
-          "E8N26": 194
-        },
-        "terminals": {
-          "avgCooldown": {
-            "E6N28": 0,
-            "E8N26": 0
-          },
-          "overload": {
-            "E6N28": 0,
-            "E8N26": 0
-          }
-        },
-        "states": {
-          "activeProviders": {
-            "E6N28": ["GO", "ZO", "LO", "KO"],
-            "E8N26": ["GO", "ZO", "LO", "KO"]
-          },
-          "passiveProviders": {
-            "E6N28": ["ZK", "O"],
-            "E8N26": ["mist"]
-          },
-          "equilibriumNodes": {
-            "E6N28": [
-              "XGHO2",
-              "XZHO2",
-              "XZH2O",
-              "XLHO2",
-              "XLH2O",
-              "XKHO2",
-              "XKH2O",
-              "XUH2O",
-              "ops",
-              "GHO2",
-              "ZHO2",
-              "ZH2O",
-              "LHO2",
-              "LH2O",
-              "KHO2",
-              "KH2O",
-              "UH2O",
-              "power",
-              "energy",
-              "silicon",
-              "metal",
-              "biomass",
-              "mist",
-              "utrium_bar",
-              "lemergium_bar",
-              "zynthium_bar",
-              "keanium_bar",
-              "ghodium_melt",
-              "oxidant",
-              "reductant",
-              "purifier",
-              "composite",
-              "crystal",
-              "liquid",
-              "wire",
-              "switch",
-              "transistor",
-              "microchip",
-              "circuit",
-              "device",
-              "cell",
-              "phlegm",
-              "tissue",
-              "muscle",
-              "organoid",
-              "organism",
-              "alloy",
-              "tube",
-              "fixtures",
-              "frame",
-              "hydraulics",
-              "machine",
-              "condensate",
-              "concentrate",
-              "extract",
-              "spirit",
-              "emanation",
-              "essence",
-              "essence"
-            ],
-            "E8N26": [
-              "XGHO2",
-              "XZHO2",
-              "XZH2O",
-              "XLHO2",
-              "XLH2O",
-              "XKHO2",
-              "XKH2O",
-              "XUH2O",
-              "ops",
-              "GHO2",
-              "ZHO2",
-              "ZH2O",
-              "LHO2",
-              "LH2O",
-              "KHO2",
-              "KH2O",
-              "UH2O",
-              "ZK",
-              "Z",
-              "L",
-              "K",
-              "O",
-              "power",
-              "energy",
-              "silicon",
-              "metal",
-              "biomass",
-              "utrium_bar",
-              "lemergium_bar",
-              "zynthium_bar",
-              "keanium_bar",
-              "ghodium_melt",
-              "oxidant",
-              "reductant",
-              "purifier",
-              "composite",
-              "crystal",
-              "liquid",
-              "wire",
-              "switch",
-              "transistor",
-              "microchip",
-              "circuit",
-              "device",
-              "cell",
-              "phlegm",
-              "tissue",
-              "muscle",
-              "organoid",
-              "organism",
-              "alloy",
-              "tube",
-              "fixtures",
-              "frame",
-              "hydraulics",
-              "machine",
-              "condensate",
-              "concentrate",
-              "extract",
-              "spirit",
-              "emanation",
-              "essence",
-              "essence"
-            ]
-          },
-          "passiveRequestors": {
-            "E6N28": [
-              "XGH2O",
-              "XUHO2",
-              "GH2O",
-              "UHO2",
-              "GH",
-              "ZH",
-              "LH",
-              "KH",
-              "UO",
-              "UH",
-              "OH",
-              "UL",
-              "G",
-              "X",
-              "Z",
-              "L",
-              "K",
-              "U",
-              "H"
-            ],
-            "E8N26": [
-              "XGH2O",
-              "XUHO2",
-              "GH2O",
-              "UHO2",
-              "GH",
-              "ZH",
-              "LH",
-              "KH",
-              "UO",
-              "UH",
-              "OH",
-              "UL",
-              "G",
-              "X",
-              "U",
-              "H",
-              "H"
-            ]
-          },
-          "activeRequestors": {
-            "E8N26": ["battery"],
-            "E6N28": ["battery"]
-          }
-        }
-      }
-    },
-    "time": 73668686,
-    "unixTimestamp": 1759334995614
+      "avgCPU": 7.0046,
+      "lastBucket": 10000,
+      "avgBucketDelta": 92.67205
+    }
   }
 }
