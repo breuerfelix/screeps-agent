@@ -13,6 +13,7 @@ local rclPanels = import 'panels/rcl_panels.libsonnet';
 local creepPanels = import 'panels/creep_panels.libsonnet';
 local assetPanels = import 'panels/asset_panels.libsonnet';
 local energyPanels = import 'panels/energy_panels.libsonnet';
+local subsystemPanels = import 'panels/subsystem_panels.libsonnet';
 
 // Reusable style objects
 local styles = {
@@ -57,7 +58,10 @@ local energyRowY = cpuMemoryY + cpuMemoryHeight;
 local energyY = energyRowY + 1;
 local energyHeight = 12;
 local energyTotalHeight = energyHeight * 4;  // Energy section now has 4 rows
-local creepsRowY = energyY + energyTotalHeight;
+local subsystemRowY = energyY + energyTotalHeight;
+local subsystemY = subsystemRowY + 1;
+local subsystemObj = subsystemPanels.new(subsystemY);
+local creepsRowY = subsystemY + subsystemObj.rowHeight;
 local creepsY = creepsRowY + 1;
 local creepsObj = creepPanels.new(creepsY);
 local assetsRowY = creepsY + creepsObj.rowHeight;
@@ -894,6 +898,19 @@ dashboard.new(
     h: energyHeight,
   }
 )
+// === SUBSYSTEM HEALTH ROW ===
+.addPanel(
+  row.new(
+    title='Subsystem Health',
+  ),
+  gridPos={
+    x: 0,
+    y: subsystemRowY,
+    w: 24,
+    h: 1,
+  }
+)
+.addPanels(subsystemObj.panels)
 // === CREEPS ROW ===
 .addPanel(
   row.new(
