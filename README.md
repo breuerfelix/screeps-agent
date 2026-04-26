@@ -4,7 +4,7 @@ This Node.js agent fetches memory segments from the Screeps API and pushes metri
 
 ## Features
 
-- Fetches memory segments from all Screeps shards (shard1, shard3, shardSeason)
+- Fetches memory segments from all Screeps shards (shardSeason, shardX)
 - Parses JSON data from memory segments and extracts metrics
 - Pushes metrics to VictoriaMetrics in proper time-series format
 - Runs continuously with 3-minute intervals using cron scheduling

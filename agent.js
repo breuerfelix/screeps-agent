@@ -5,7 +5,7 @@ require("dotenv").config();
 const cron = require("node-cron");
 const { processShards } = require("./one_shot");
 
-const SHARDS = ["shard1", "shard3", "shardSeason"];
+const SHARDS = ["shardSeason", "shardX"];
 
 class ScreepsAgent {
   constructor() {

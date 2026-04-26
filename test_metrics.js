@@ -9,7 +9,7 @@ const segmentData = JSON.parse(
 ).data;
 
 // Extract metrics
-const metrics = extractMetrics(segmentData, "shard3");
+const metrics = extractMetrics(segmentData, "shardX");
 
 // Group metrics by unique metric name
 const metricsByName = new Map();

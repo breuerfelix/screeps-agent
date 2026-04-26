@@ -26,7 +26,7 @@ async function fetchSegments(shard) {
 }
 
 async function main() {
-  const shard = process.argv[2] || "shard3";
+  const shard = process.argv[2] || "shardX";
   const data = await fetchSegments(shard);
   console.log(JSON.stringify(data, null, 2));
 }

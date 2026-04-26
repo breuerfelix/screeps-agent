@@ -297,14 +297,14 @@ async function main() {
   if (success) {
     console.log("✓ Successfully pushed metrics to VictoriaMetrics");
     console.log("\nExample queries you can now run:");
-    console.log('- screeps_colony_rcl_level{shard="shard3",colony="E8N26"}');
+    console.log('- screeps_colony_rcl_level{shard="shardX",colony="E8N26"}');
     console.log(
-      '- screeps_colony_assets{shard="shard3",colony="E6N28",resource="energy"}',
+      '- screeps_colony_assets{shard="shardX",colony="E6N28",resource="energy"}',
     );
-    console.log('- screeps_cpu_used{shard="shard3"}');
-    console.log('- screeps_trader_credits{shard="shard3"}');
+    console.log('- screeps_cpu_used{shard="shardX"}');
+    console.log('- screeps_trader_credits{shard="shardX"}');
     console.log(
-      '- screeps_terminal_network_assets{shard="shard3",resource="energy"}',
+      '- screeps_terminal_network_assets{shard="shardX",resource="energy"}',
     );
   } else {
     console.log("✗ Failed to push metrics");
