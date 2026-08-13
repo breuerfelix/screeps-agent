@@ -1,190 +1,130 @@
 # Screeps Monitoring Agent
 
-This Node.js agent fetches memory segments from the Screeps API and pushes metrics to VictoriaMetrics for monitoring and visualization in Grafana.
+This Node.js agent fetches Screeps memory segments and pushes metrics to VictoriaMetrics for monitoring and visualization in Grafana.
 
 ## Features
 
-- Fetches memory segments from all Screeps shards (shardSeason, shardX)
+- Fetches memory segments from Screeps shards such as `shardSeason` and `shardX`
 - Parses JSON data from memory segments and extracts metrics
-- Pushes metrics to VictoriaMetrics in proper time-series format
-- Runs continuously with 3-minute intervals using cron scheduling
-- Handles different types of data: stats, rooms, market, military, economy
-- Dockerized for easy deployment
-- Built with Node.js 18+ for optimal performance
+- Pushes metrics to VictoriaMetrics in time-series format
+- Runs continuously on a 2-minute schedule
+- Ships as a Docker image for local and remote deployments
+- Publishes container images to GHCR via GitHub Actions
 
-## Quick Start
+## Published container image
 
-1. **Configure your Screeps token**:
+This repository publishes images to:
 
-   - Update the `SCREEPS_TOKEN` in `docker-compose.yml` with your actual Screeps API token
-   - Get your token from: https://screeps.com/a/#!/account/auth-tokens
+`ghcr.io/breuerfelix/screeps-agent`
 
-2. **Start the monitoring stack**:
+Tag strategy:
 
-   ```bash
-   docker-compose up -d
-   ```
+- Branch pushes: sanitized branch-name tags such as `main` or `ci-ghcr-publish`
+- Every push: `sha-<full-git-sha>`
+- Default branch only: `main` and `latest`
+- Git tags like `v1.2.3`: `v1.2.3`
 
-3. **Access Grafana**:
-
-   - URL: http://localhost:3000
-   - Username: admin
-   - Password: jamo
-
-4. **VictoriaMetrics**:
-   - API: http://localhost:8428
-   - Query interface: http://localhost:8428/vmui
-
-## Development & Testing
-
-### Local Development
+Examples:
 
 ```bash
-# Install dependencies
-npm install
+docker pull ghcr.io/breuerfelix/screeps-agent:main
+docker pull ghcr.io/breuerfelix/screeps-agent:sha-<full-git-sha>
+```
 
-# Run the agent locally
+The GitHub Actions workflow logs in with `GITHUB_TOKEN` and pushes to the package namespace that matches this repository.
+
+## Consuming the published image
+
+### Docker Compose
+
+1. Copy the example env file and set your Screeps token:
+
+```bash
+cp .env.example .env
+```
+
+2. Edit `.env` and set at least:
+
+```dotenv
+SCREEPS_TOKEN=your-screeps-token
+VICTORIA_METRICS_URL=http://victoriametrics:8428
+SCREEPS_AGENT_IMAGE=ghcr.io/breuerfelix/screeps-agent:main
+```
+
+3. Start the stack:
+
+```bash
+docker compose up -d
+```
+
+The included `docker-compose.yml` consumes the published GHCR image by default instead of rebuilding locally.
+
+### Downstream deployments outside this repository
+
+If the package remains private, the deployment environment must authenticate to GHCR before pulling:
+
+```bash
+echo "$GHCR_TOKEN" | docker login ghcr.io -u <github-user> --password-stdin
+docker pull ghcr.io/breuerfelix/screeps-agent:main
+```
+
+Typical token scopes:
+
+- `read:packages` to pull from GHCR
+- `write:packages` only for publishing environments
+
+For GitHub-hosted workflows in the same repository, the built-in `GITHUB_TOKEN` is enough for publishing.
+
+## Local development
+
+```bash
+npm ci
 npm start
+```
 
-# Run in test mode (single execution)
+Single-run mode:
+
+```bash
 TEST_MODE=true npm start
-
-# Run tests
-npm test
 ```
 
-### Testing with Sample Data
+Syntax check the main scripts:
 
 ```bash
-# Run the test script to verify the agent works with sample data
-node test-agent.js
+node --check agent.js
+node --check fetch_segments.js
+node --check one_shot.js
+node --check ingest_segment.js
+node --check segment_parser.js
 ```
 
-## Quick Start
-
-### Prerequisites
-
-- Docker and Docker Compose installed on your system
-
-### Running Grafana and Victoria Metrics
-
-1. Start the services:
+## Local container build
 
 ```bash
-docker-compose up -d
+docker build -t screeps-agent:dev .
 ```
 
-2. Access Grafana:
+## Monitoring stack
 
-   - URL: http://localhost:3000
-   - Username: `admin`
-   - Password: `adminadmin`
+The repository also includes a local monitoring stack for development:
 
-3. Access Victoria Metrics:
-   - URL: http://localhost:8428
-   - Web interface for queries and debugging
+- Grafana on `http://localhost:3000`
+- VictoriaMetrics on `http://localhost:8428`
 
-### Services Included
-
-- **Grafana** (port 3000): Visualization and dashboards
-- **Victoria Metrics** (port 8428): High-performance time-series database
-
-### Configuration
-
-#### Victoria Metrics Setup
-
-Victoria Metrics is configured with:
-
-- Data retention: 30 days
-- Storage path: `./data/metrics`
-- Prometheus-compatible API on port 8428
-
-#### Grafana Setup
-
-Grafana comes pre-configured with:
-
-- Victoria Metrics datasource (both native plugin and Prometheus-compatible)
-- Sample Screeps dashboard with PromQL queries
-- Dashboard auto-discovery from the `grafana/dashboards/` directory
-
-### Sample Dashboards
-
-Two sample Screeps dashboards are included:
-
-1. `screeps-dashboard.json` - Original InfluxDB version (for reference)
-2. `screeps-dashboard-vm.json` - Victoria Metrics version with PromQL queries
-
-Panels include:
-
-- Energy levels over time
-- GCL (Global Control Level) gauge
-- Creep count by room
-
-### Data Ingestion
-
-Victoria Metrics accepts data in multiple formats:
-
-#### Prometheus Format (Recommended)
-
-Send metrics to: `http://localhost:8428/api/v1/import/prometheus`
-
-Example metrics:
-
-```
-screeps_energy{room="W1N1"} 1000
-screeps_gcl_level 5
-screeps_creeps_count{room="W1N1",role="harvester"} 2
-```
-
-#### InfluxDB Line Protocol
-
-Send metrics to: `http://localhost:8428/api/v1/import/influx`
-
-Example metrics:
-
-```
-energy,room=W1N1 value=1000
-gcl level=5
-creeps,room=W1N1,role=harvester count=2
-```
-
-### Stopping the Services
+Start it with:
 
 ```bash
-docker-compose down
+docker compose up -d
 ```
 
-To also remove the data (metrics will be lost):
+Default Grafana credentials in the sample compose file:
 
-```bash
-docker-compose down && rm -rf data/
-```
+- Username: `admin`
+- Password: `jamo`
 
-### Why Victoria Metrics?
+## Security notes
 
-Victoria Metrics offers several advantages:
-
-- **High performance**: Much faster than InfluxDB for single-node setups
-- **Low resource usage**: Perfect for low-performance servers
-- **Prometheus compatibility**: Easy migration and familiar PromQL
-- **Multiple ingestion formats**: Supports both Prometheus and InfluxDB protocols
-- **Built-in deduplication**: Handles duplicate metrics automatically
-
-### Security Notes
-
-⚠️ **Important**: This setup is for local development only. For production use:
-
-- Change the default passwords
-- Use proper authentication and authorization
-- Consider using environment variables for sensitive configuration
-- Set up proper network security
-
-### Customizing Dashboards
-
-1. Place your custom dashboard JSON files in `grafana/dashboards/`
-2. Restart Grafana: `docker-compose restart grafana`
-3. Dashboards will be automatically loaded
-
-### Adding More Datasources
-
-Add datasource configuration files in `grafana/datasources/` following the same YAML format.
+- Do not commit real Screeps tokens to the repository.
+- Keep deployment credentials in environment variables or secret stores.
+- If you want anonymous pulls from GHCR, change the package visibility in GitHub from private to public after the first publish.
+- If workflow pushes fail with package permission errors, verify repository Actions settings allow `GITHUB_TOKEN` read and write permissions.
