@@ -37,10 +37,8 @@ services:
     image: ${SCREEPS_AGENT_IMAGE:-ghcr.io/breuerfelix/screeps-agent:main}
     container_name: screeps-agent
     restart: unless-stopped
-    environment:
-      SCREEPS_TOKEN: ${SCREEPS_TOKEN:?set SCREEPS_TOKEN in .env}
-      VICTORIA_METRICS_URL: ${VICTORIA_METRICS_URL:-http://victoriametrics:8428}
-      NODE_ENV: production
+    env_file:
+      - .env
     depends_on:
       - victoriametrics
     networks:

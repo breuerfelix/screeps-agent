@@ -5,6 +5,7 @@ require("dotenv").config();
 const { fetchSegments } = require("./fetch_segments");
 const { parseSegments } = require("./segment_parser");
 const { extractMetrics, pushToVictoriaMetrics } = require("./ingest_segment");
+const { getScreepsConfig } = require("./config");
 const fs = require("fs").promises;
 
 async function processShards(shards) {
@@ -42,7 +43,7 @@ async function processShards(shards) {
 }
 
 async function main() {
-  const shards = ["shardSeason"];
+  const { shards } = getScreepsConfig();
 
   console.log("Starting data collection for shards:", shards.join(", "));
 
