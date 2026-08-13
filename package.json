@@ -4,7 +4,8 @@
   "description": "Screeps memory segment monitoring agent that pushes metrics to VictoriaMetrics",
   "main": "screeps-agent.js",
   "scripts": {
-    "start": "node agent.js"
+    "start": "node agent.js",
+    "test": "node --test"
   },
   "keywords": [
     "screeps",

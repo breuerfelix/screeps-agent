@@ -4,8 +4,7 @@ require("dotenv").config();
 
 const cron = require("node-cron");
 const { processShards } = require("./one_shot");
-
-const SHARDS = ["shardSeason", "shardX"];
+const { getScreepsConfig } = require("./config");
 
 class ScreepsAgent {
   constructor() {
@@ -18,8 +17,11 @@ class ScreepsAgent {
   }
 
   async processAllShards() {
-    this.log.info("Starting data collection cycle for all shards...");
-    await processShards(SHARDS);
+    const { shards, baseUrl } = getScreepsConfig();
+    this.log.info(
+      `Starting data collection cycle for shards ${shards.join(", ")} via ${baseUrl}...`,
+    );
+    await processShards(shards);
     this.log.info("Data collection cycle completed successfully");
   }
 
