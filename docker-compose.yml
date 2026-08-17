@@ -17,6 +17,7 @@ services:
       - ./grafana/datasources:/etc/grafana/provisioning/datasources
     networks:
       - monitoring
+
   victoriametrics:
     image: victoriametrics/victoria-metrics:latest
     container_name: victoriametrics
@@ -33,15 +34,13 @@ services:
       - monitoring
 
   screeps-agent:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ${SCREEPS_AGENT_IMAGE:-ghcr.io/breuerfelix/screeps-agent:main}
     container_name: screeps-agent
     restart: unless-stopped
     environment:
-      - SCREEPS_TOKEN=3ffb99b6-ecb0-45a3-9923-5945f0f17be5
-      - VICTORIA_METRICS_URL=http://victoriametrics:8428
-      - NODE_ENV=production
+      SCREEPS_TOKEN: ${SCREEPS_TOKEN:?set SCREEPS_TOKEN in .env}
+      VICTORIA_METRICS_URL: ${VICTORIA_METRICS_URL:-http://victoriametrics:8428}
+      NODE_ENV: production
     depends_on:
       - victoriametrics
     networks:
