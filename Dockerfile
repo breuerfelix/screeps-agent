@@ -10,7 +10,7 @@ COPY package*.json ./
 RUN npm ci --only=production
 
 # Copy the agent files
-COPY agent.js fetch_segments.js segment_parser.js ingest_segment.js one_shot.js ./
+COPY agent.js fetch_segments.js segment_parser.js ingest_segment.js one_shot.js config.js ./
 
 # Create a non-root user
 RUN useradd --create-home --shell /bin/bash screeps && \
