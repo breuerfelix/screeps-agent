@@ -87,6 +87,11 @@ Examples:
 
 Do not configure one instance to scrape both official and private worlds at once. Deploy a separate instance for the private server.
 
+The agent normalizes both Screeps response shapes seen in the wild:
+
+- official MMO responses where `/api/user/memory-segment` returns `data` as an array of segment strings
+- private-server responses where the same endpoint returns `data` as one JSON string payload even when multiple segment IDs are requested
+
 ## Consuming the published image
 
 ### Docker Compose
