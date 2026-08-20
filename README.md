@@ -151,6 +151,8 @@ For GitHub-hosted workflows in the same repository, the built-in `GITHUB_TOKEN` 
 
 ## Local development
 
+Node.js 22.4.0 or newer is required. The websocket console capture path uses the built-in `WebSocket` client, which is only stable from Node 22.4.0 onward.
+
 ```bash
 npm ci
 npm start
