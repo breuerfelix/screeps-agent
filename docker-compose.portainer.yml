@@ -1,0 +1,21 @@
+version: "3.8"
+
+services:
+  screeps-agent:
+    image: ${SCREEPS_AGENT_IMAGE:-ghcr.io/breuerfelix/screeps-agent:sha-7772fc21d5fb01aa7cf71a3b7938e2cef84f3797}
+    container_name: ${SCREEPS_AGENT_CONTAINER_NAME:-screeps-agent}
+    restart: always
+    environment:
+      SCREEPS_TOKEN: ${SCREEPS_TOKEN:?set SCREEPS_TOKEN in Portainer}
+      SCREEPS_BASE_URL: ${SCREEPS_BASE_URL:-https://screeps.com}
+      SCREEPS_SHARDS: ${SCREEPS_SHARDS:-shardSeason,shardX}
+      VICTORIA_METRICS_URL: ${VICTORIA_METRICS_URL:-http://victoriametrics:8428}
+      NODE_ENV: ${NODE_ENV:-production}
+      TEST_MODE: ${TEST_MODE:-false}
+    networks:
+      - monitoring
+
+networks:
+  monitoring:
+    external: true
+    name: ${MONITORING_NETWORK:-monitoring_monitoring}
