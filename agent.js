@@ -1,13 +1,15 @@
 #!/usr/bin/env node
 
-require("dotenv").config();
+require("dotenv").config({ quiet: true });
 
 const cron = require("node-cron");
 const { processShards } = require("./one_shot");
+const { startConsoleLogStreaming } = require("./console_log_capture");
 const { getScreepsConfig } = require("./config");
 
 class ScreepsAgent {
   constructor() {
+    this.shutdownController = new AbortController();
     this.log = {
       info: (msg) => console.log(`[${new Date().toISOString()}] INFO: ${msg}`),
       warn: (msg) => console.log(`[${new Date().toISOString()}] WARN: ${msg}`),
@@ -25,10 +27,31 @@ class ScreepsAgent {
     this.log.info("Data collection cycle completed successfully");
   }
 
+  startConsoleLogs() {
+    startConsoleLogStreaming({
+      logger: this.log,
+      signal: this.shutdownController.signal,
+    }).catch((error) => {
+      if (!this.shutdownController.signal.aborted) {
+        this.log.error(`Console websocket streamer exited: ${error.message}`);
+      }
+    });
+  }
+
+  shutdown() {
+    if (this.shutdownController.signal.aborted) {
+      return;
+    }
+
+    this.log.info("Shutting down gracefully...");
+    this.shutdownController.abort();
+    process.exit(0);
+  }
+
   start() {
     this.log.info("Starting Screeps Agent - collecting data every 2 minutes");
+    this.startConsoleLogs();
 
-    // Schedule to run every 2 minutes
     cron.schedule("*/2 * * * *", async () => {
       try {
         await this.processAllShards();
@@ -37,31 +60,23 @@ class ScreepsAgent {
       }
     });
 
-    // // Run once immediately
-    // this.processAllShards().catch((error) => {
-    //   this.log.error(`Initial collection failed: ${error.message}`);
-    // });
-
     this.log.info("Agent scheduled and running...");
 
-    // Keep the process alive
     process.on("SIGINT", () => {
-      this.log.info("Received SIGINT, shutting down gracefully...");
-      process.exit(0);
+      this.log.info("Received SIGINT");
+      this.shutdown();
     });
 
     process.on("SIGTERM", () => {
-      this.log.info("Received SIGTERM, shutting down gracefully...");
-      process.exit(0);
+      this.log.info("Received SIGTERM");
+      this.shutdown();
     });
   }
 }
 
-// Main entry point
 function main() {
   const agent = new ScreepsAgent();
 
-  // Test mode if TEST_MODE environment variable is set
   if (process.env.TEST_MODE?.toLowerCase() === "true") {
     console.log("Running in test mode - single collection cycle");
     agent

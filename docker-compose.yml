@@ -33,6 +33,15 @@ services:
     networks:
       - monitoring
 
+  loki:
+    image: grafana/loki:latest
+    container_name: loki
+    restart: unless-stopped
+    ports:
+      - "3100:3100"
+    networks:
+      - monitoring
+
   screeps-agent:
     image: ${SCREEPS_AGENT_IMAGE:-ghcr.io/breuerfelix/screeps-agent:main}
     container_name: screeps-agent
@@ -41,6 +50,7 @@ services:
       - .env
     depends_on:
       - victoriametrics
+      - loki
     networks:
       - monitoring
 

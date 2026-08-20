@@ -7,11 +7,13 @@ This Node.js agent fetches Screeps memory segments and pushes metrics to Victori
 - Fetches memory segments from configured Screeps shards
 - Parses JSON data from memory segments and extracts metrics
 - Pushes metrics to VictoriaMetrics in time-series format
+- Streams Screeps console websocket messages into Loki when `LOKI_URL` is configured
+- Labels console logs with `shard`, `server_host`, `username`, and `message_type`
 - Runs continuously on a 2-minute schedule
 - Ships as a Docker image for local and remote deployments
 - Publishes container images to GHCR via GitHub Actions
 - Supports env-configured Screeps targets via `SCREEPS_BASE_URL` and `SCREEPS_SHARDS`
-- Keeps metrics labeled by `shard` only; no world/server label was added
+- Keeps metrics labeled by `shard` only; console logs also carry `server_host` for cross-environment separation
 
 Backward-compatible defaults remain for the current official-world deployment:
 
@@ -60,9 +62,15 @@ cp .env.example .env
   - official world example: `shardSeason,shardX`
   - private server example: `coolify`
 - `VICTORIA_METRICS_URL` — VictoriaMetrics base URL
+- `LOKI_URL` — Loki base URL for console log ingestion
+  - local compose example: `http://loki:3100`
+  - external host example: `http://loki.example.internal:3100`
+  - when unset, websocket console capture stays disabled and the agent still exports metrics only
 - `SCREEPS_AGENT_IMAGE` — GHCR image tag to deploy, default `ghcr.io/breuerfelix/screeps-agent:main`
 - `NODE_ENV` — usually `production`
 - `TEST_MODE` — set to `true` for a single collection cycle
+
+When the console websocket payload omits `shard`, the agent falls back to the single configured value from `SCREEPS_SHARDS`. This matters for many private-server deployments where websocket console events do not include shard data even though the deployment is single-shard.
 
 ## Deployment model
 
@@ -98,6 +106,7 @@ SCREEPS_TOKEN=replace-with-official-token
 SCREEPS_BASE_URL=https://screeps.com
 SCREEPS_SHARDS=shardSeason,shardX
 VICTORIA_METRICS_URL=http://victoriametrics:8428
+LOKI_URL=http://loki:3100
 SCREEPS_AGENT_IMAGE=ghcr.io/breuerfelix/screeps-agent:main
 NODE_ENV=production
 TEST_MODE=false
@@ -110,6 +119,7 @@ SCREEPS_TOKEN=replace-with-private-server-token
 SCREEPS_BASE_URL=https://screeps.example.internal
 SCREEPS_SHARDS=coolify
 VICTORIA_METRICS_URL=http://victoriametrics:8428
+LOKI_URL=http://loki:3100
 SCREEPS_AGENT_IMAGE=ghcr.io/breuerfelix/screeps-agent:main
 NODE_ENV=production
 TEST_MODE=false
@@ -141,6 +151,8 @@ For GitHub-hosted workflows in the same repository, the built-in `GITHUB_TOKEN` 
 
 ## Local development
 
+Node.js 22.4.0 or newer is required. The websocket console capture path uses the built-in `WebSocket` client, which is only stable from Node 22.4.0 onward.
+
 ```bash
 npm ci
 npm start
@@ -152,6 +164,14 @@ Single-run mode:
 TEST_MODE=true npm start
 ```
 
+Probe the websocket console path against the configured Screeps target:
+
+```bash
+npm run probe:console
+```
+
+If `LOKI_URL` is set, the probe also pushes the captured console event into Loki so you can verify end-to-end ingestion.
+
 Run tests:
 
 ```bash
@@ -162,6 +182,9 @@ Syntax check the main scripts:
 
 ```bash
 node --check agent.js
+node --check console_log_capture.js
+node --check loki.js
+node --check probe_console_logs.js
 node --check fetch_segments.js
 node --check one_shot.js
 node --check ingest_segment.js
@@ -180,6 +203,7 @@ The repository also includes a local monitoring stack for development:
 
 - Grafana on `http://localhost:3000`
 - VictoriaMetrics on `http://localhost:8428`
+- Loki on `http://localhost:3100`
 
 Start it with:
 
@@ -197,6 +221,8 @@ Default Grafana credentials in the sample compose file:
 - The official Screeps season endpoint still uses `https://screeps.com/season/api/...` when the base URL is official and shard is `shardSeason`.
 - All other targets, including private servers, use `<SCREEPS_BASE_URL>/api/...`.
 - Metrics remain distinguished by shard name only.
+- Console logs sent to Loki use labels `{source="screeps_console", server_host="...", username="...", shard="...", message_type="log|result|error"}`.
+- For single-shard private deployments, console events that omit `payload.shard` inherit the single configured `SCREEPS_SHARDS` value so Loki streams still remain shard-addressable.
 
 ## Security notes
 

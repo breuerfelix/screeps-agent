@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-require("dotenv").config();
+require("dotenv").config({ quiet: true });
 
 const { fetchSegments } = require("./fetch_segments");
 const { parseSegments } = require("./segment_parser");

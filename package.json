@@ -1,17 +1,20 @@
 {
   "name": "screeps-monitoring-agent",
   "version": "1.0.0",
-  "description": "Screeps memory segment monitoring agent that pushes metrics to VictoriaMetrics",
+  "description": "Screeps memory segment monitoring agent that pushes metrics to VictoriaMetrics and console logs to Loki",
   "main": "screeps-agent.js",
   "scripts": {
     "start": "node agent.js",
-    "test": "node --test"
+    "test": "node --test",
+    "probe:console": "node probe_console_logs.js"
   },
   "keywords": [
     "screeps",
     "monitoring",
     "victoriametrics",
+    "loki",
     "metrics",
+    "logs",
     "agent"
   ],
   "author": "Screeps Monitoring Team",
@@ -22,6 +25,6 @@
     "node-cron": "^4.2.1"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=22.4.0"
   }
 }
