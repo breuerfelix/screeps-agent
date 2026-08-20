@@ -10,6 +10,7 @@ services:
       SCREEPS_BASE_URL: ${SCREEPS_BASE_URL:-https://screeps.com}
       SCREEPS_SHARDS: ${SCREEPS_SHARDS:-shardSeason,shardX}
       VICTORIA_METRICS_URL: ${VICTORIA_METRICS_URL:-http://victoriametrics:8428}
+      LOKI_URL: ${LOKI_URL:-}
       NODE_ENV: ${NODE_ENV:-production}
       TEST_MODE: ${TEST_MODE:-false}
     networks:

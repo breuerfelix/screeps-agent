@@ -21,6 +21,7 @@ test("Portainer compose keeps official-world deployment on GitOps-managed main i
     compose,
     /SCREEPS_SHARDS:\s+\$\{SCREEPS_SHARDS:-shardSeason,shardX\}/,
   );
+  assert.match(compose, /LOKI_URL:\s+\$\{LOKI_URL:-\}/);
   assert.match(
     compose,
     /name:\s+\$\{MONITORING_NETWORK:-monitoring_monitoring\}/,
