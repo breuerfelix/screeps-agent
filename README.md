@@ -130,7 +130,7 @@ Use `docker-compose.portainer.yml` as the stack file when the official-world scr
 What this file does:
 
 - runs only the `screeps-agent` service, matching the existing standalone deployment shape
-- uses `ghcr.io/breuerfelix/screeps-agent:sha-7772fc21d5fb01aa7cf71a3b7938e2cef84f3797` by default for deterministic reconciles
+- uses `ghcr.io/breuerfelix/screeps-agent:main` by default so Portainer follows the repository's main image line
 - keeps the same environment variable names already used by the container (`SCREEPS_TOKEN`, `VICTORIA_METRICS_URL`, `NODE_ENV`)
 - preserves official-world defaults when `SCREEPS_BASE_URL` and `SCREEPS_SHARDS` are not overridden
 - joins the existing `monitoring_monitoring` Docker network by default instead of creating a new monitoring stack
@@ -150,12 +150,12 @@ Optional overrides:
 ```env
 SCREEPS_BASE_URL=https://screeps.com
 SCREEPS_SHARDS=shardSeason,shardX
-SCREEPS_AGENT_IMAGE=ghcr.io/breuerfelix/screeps-agent:sha-7772fc21d5fb01aa7cf71a3b7938e2cef84f3797
+SCREEPS_AGENT_IMAGE=ghcr.io/breuerfelix/screeps-agent:main
 MONITORING_NETWORK=monitoring_monitoring
 SCREEPS_AGENT_CONTAINER_NAME=screeps-agent
 ```
 
-For future image rollouts, update the pinned `SCREEPS_AGENT_IMAGE` value in git and let Portainer reconcile from the repository instead of editing the live container by hand.
+By default Portainer follows `ghcr.io/breuerfelix/screeps-agent:main`. Override `SCREEPS_AGENT_IMAGE` only when you intentionally need a different tag.
 
 ### Downstream deployments outside this repository
 

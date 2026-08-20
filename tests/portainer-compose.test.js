@@ -3,7 +3,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 
-test("Portainer compose keeps official-world deployment on GitOps-managed GHCR image", () => {
+test("Portainer compose keeps official-world deployment on GitOps-managed main image", () => {
   const compose = fs.readFileSync(
     path.join(__dirname, "..", "docker-compose.portainer.yml"),
     "utf8",
@@ -11,7 +11,7 @@ test("Portainer compose keeps official-world deployment on GitOps-managed GHCR i
 
   assert.match(
     compose,
-    /image:\s+\$\{SCREEPS_AGENT_IMAGE:-ghcr\.io\/breuerfelix\/screeps-agent:sha-7772fc21d5fb01aa7cf71a3b7938e2cef84f3797\}/,
+    /image:\s+\$\{SCREEPS_AGENT_IMAGE:-ghcr\.io\/breuerfelix\/screeps-agent:main\}/,
   );
   assert.match(
     compose,

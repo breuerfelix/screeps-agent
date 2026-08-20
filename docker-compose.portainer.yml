@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   screeps-agent:
-    image: ${SCREEPS_AGENT_IMAGE:-ghcr.io/breuerfelix/screeps-agent:sha-7772fc21d5fb01aa7cf71a3b7938e2cef84f3797}
+    image: ${SCREEPS_AGENT_IMAGE:-ghcr.io/breuerfelix/screeps-agent:main}
     container_name: ${SCREEPS_AGENT_CONTAINER_NAME:-screeps-agent}
     restart: always
     environment:
