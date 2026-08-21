@@ -112,6 +112,33 @@ Useful LogQL queries:
 {source="screeps_console", server_host="screeps.felixbreuer.me", shard="coolify"} | json | context_creep="worker-42" | context_room="W1N1"
 ```
 
+### Troubleshooting structured logs
+
+Use a non-empty static selector before adding JSON filters:
+
+```logql
+{source="screeps_console", shard="coolify"}
+```
+
+If `| json` reports `JSONParserErr` and the raw line starts with `<font`, an
+HTML room link, or a timestamp prefix, the bot deployment is still emitting
+the pre-schema format. Rebuild and deploy the current bot bundle, then confirm
+the collector image is using this parser. The `logger="legacy"` fallback is
+temporary ingestion compatibility and is not evidence that the bot is healthy.
+
+If the stream is valid but a context query is empty, inspect the raw event and
+confirm that the relevant helper had an identity available and that per-object
+debug logging was enabled. `context.*`, `level`, `logger`, and `data.*` are JSON
+fields, never Loki labels; do not query them in the stream selector.
+
+Local checks:
+
+```bash
+npm test
+node --check console_log_capture.js
+node --check loki.js
+```
+
 ## Deployment model
 
 Run one agent instance per world.
