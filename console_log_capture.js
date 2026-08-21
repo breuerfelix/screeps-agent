@@ -11,6 +11,14 @@ const { pushLogsToLoki, toTimestampNs } = require("./loki");
 
 const DEFAULT_PROBE_TIMEOUT_MS = 30000;
 const DEFAULT_RECONNECT_DELAY_MS = 5000;
+const STRUCTURED_LOG_LEVELS = new Set([
+  "fatal",
+  "error",
+  "warning",
+  "alert",
+  "info",
+  "debug",
+]);
 
 function randomSessionId() {
   const alphabet = "abcdefghijklmnopqrstuvwxyz012345";
@@ -73,9 +81,124 @@ function buildBaseLogLabels(baseUrl, username) {
   };
 }
 
+function normalizeTimestampMs(timestampMs = Date.now()) {
+  return Number.isFinite(timestampMs) ? timestampMs : Date.now();
+}
+
+function isStructuredLogEvent(value) {
+  return (
+    value &&
+    typeof value === "object" &&
+    !Array.isArray(value) &&
+    value.schema_version === 1 &&
+    typeof value.timestamp === "string" &&
+    STRUCTURED_LOG_LEVELS.has(value.level) &&
+    typeof value.message === "string" &&
+    typeof value.source === "string" &&
+    typeof value.logger === "string"
+  );
+}
+
+function toRawLogLine(value) {
+  if (typeof value === "string") {
+    return value;
+  }
+
+  try {
+    const serialized = JSON.stringify(value);
+    return serialized === undefined ? String(value) : serialized;
+  } catch {
+    return String(value);
+  }
+}
+
+function buildFallbackLogEvent(rawLine, timestampMs, parseError) {
+  const data = {
+    legacy: true,
+    raw_line: rawLine,
+  };
+
+  if (parseError) {
+    data.parse_error = true;
+  }
+
+  return {
+    schema_version: 1,
+    timestamp: new Date(timestampMs).toISOString(),
+    level: "info",
+    message: rawLine,
+    source: "screeps_console",
+    logger: "legacy",
+    data,
+  };
+}
+
+function normalizeConsoleLogLine(value, ingestionTimestampMs) {
+  const rawLine = toRawLogLine(value);
+  const trimmedLine = rawLine.trim();
+  const timestampMs = normalizeTimestampMs(ingestionTimestampMs);
+  let event;
+
+  try {
+    event = JSON.parse(trimmedLine);
+  } catch {
+    event = null;
+  }
+
+  if (!isStructuredLogEvent(event)) {
+    const parseError =
+      trimmedLine.startsWith("{") ||
+      trimmedLine.startsWith('"') ||
+      (trimmedLine.startsWith("[") &&
+        !/^\[[^\]\r\n]+\]\s/.test(trimmedLine));
+    event = buildFallbackLogEvent(rawLine, timestampMs, parseError);
+
+    return {
+      line: JSON.stringify(event),
+      timestampNs: toTimestampNs(timestampMs),
+    };
+  }
+
+  const eventTimestampMs = Date.parse(event.timestamp);
+
+  return {
+    line: trimmedLine,
+    timestampNs: toTimestampNs(
+      Number.isNaN(eventTimestampMs) ? timestampMs : eventTimestampMs,
+    ),
+  };
+}
+
+function buildConsoleErrorEntry(error, labels, timestampMs) {
+  const messageValue =
+    typeof error === "string"
+      ? error
+      : error?.message || toRawLogLine(error);
+  const message =
+    typeof messageValue === "string" ? messageValue : toRawLogLine(messageValue);
+  const event = {
+    schema_version: 1,
+    timestamp: new Date(timestampMs).toISOString(),
+    level: "error",
+    message,
+    source: "screeps_agent",
+    logger: "console_stream",
+    error: {
+      name: "ScreepsConsoleError",
+      message,
+    },
+  };
+
+  return {
+    labels: { ...labels, message_type: "error" },
+    line: JSON.stringify(event),
+    timestampNs: toTimestampNs(timestampMs),
+  };
+}
+
 function buildConsoleLogEntries(payload, options = {}) {
   const shard = payload?.shard || options.defaultShard || "unknown";
-  const timestampNs = toTimestampNs(options.timestampMs);
+  const timestampMs = normalizeTimestampMs(options.timestampMs);
   const labels = {
     ...(options.baseLabels || {}),
     shard,
@@ -83,27 +206,25 @@ function buildConsoleLogEntries(payload, options = {}) {
   const entries = [];
 
   for (const line of payload?.messages?.log || []) {
+    const normalized = normalizeConsoleLogLine(line, timestampMs);
     entries.push({
       labels: { ...labels, message_type: "log" },
-      line: String(line),
-      timestampNs,
+      line: normalized.line,
+      timestampNs: normalized.timestampNs,
     });
   }
 
   for (const line of payload?.messages?.results || []) {
+    const normalized = normalizeConsoleLogLine(line, timestampMs);
     entries.push({
       labels: { ...labels, message_type: "result" },
-      line: String(line),
-      timestampNs,
+      line: normalized.line,
+      timestampNs: normalized.timestampNs,
     });
   }
 
   if (payload?.error) {
-    entries.push({
-      labels: { ...labels, message_type: "error" },
-      line: String(payload.error),
-      timestampNs,
-    });
+    entries.push(buildConsoleErrorEntry(payload.error, labels, timestampMs));
   }
 
   return entries;
@@ -445,6 +566,8 @@ module.exports = {
   buildConsoleChannel,
   buildConsoleLogEntries,
   buildSocketUrl,
+  isStructuredLogEvent,
+  normalizeConsoleLogLine,
   fetchUserIdentity,
   parseSockJsFrame,
   postConsoleExpression,
