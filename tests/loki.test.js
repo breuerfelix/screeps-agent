@@ -50,3 +50,41 @@ test("groups log entries into Loki streams by label set", () => {
     ],
   });
 });
+
+test("keeps structured JSON fields in one Loki line without turning them into labels", () => {
+  const line = JSON.stringify({
+    schema_version: 1,
+    timestamp: "2026-08-21T18:30:42.123Z",
+    level: "error",
+    message: "Failed to refresh creep",
+    source: "overmind",
+    logger: "Overlord",
+    context: { creep: "worker-42", overlord: "W1N1>worker" },
+  });
+
+  const payload = buildLokiPayload([
+    {
+      labels: {
+        source: "screeps_console",
+        server_host: "screeps.felixbreuer.me",
+        shard: "coolify",
+        message_type: "log",
+      },
+      line,
+      timestampNs: "1787337042123000000",
+    },
+  ]);
+
+  assert.deepEqual(payload.streams[0].stream, {
+    source: "screeps_console",
+    server_host: "screeps.felixbreuer.me",
+    shard: "coolify",
+    message_type: "log",
+  });
+  assert.equal(payload.streams[0].values[0][0], "1787337042123000000");
+  assert.equal(payload.streams[0].values[0][1], line);
+  assert.deepEqual(JSON.parse(payload.streams[0].values[0][1]).context, {
+    creep: "worker-42",
+    overlord: "W1N1>worker",
+  });
+});

@@ -72,6 +72,46 @@ cp .env.example .env
 
 When the console websocket payload omits `shard`, the agent falls back to the single configured value from `SCREEPS_SHARDS`. This matters for many private-server deployments where websocket console events do not include shard data even though the deployment is single-shard.
 
+### Structured console log ingestion
+
+Each line in `messages.log` becomes exactly one Loki entry. Schema-v1 JSON
+events from the bot are validated, kept as their original JSON line, and sent
+to Loki with the event's ISO-8601 `timestamp`. Missing or invalid event
+timestamps use ingestion time instead. The JSON body remains intact, so
+`level`, `logger`, `tick`, `context`, `data`, and `error` stay available to
+LogQL's `json` parser.
+
+The collector uses only stable transport labels:
+
+```text
+{source="screeps_console", server_host="...", username="...", shard="...", message_type="log|result|error"}
+```
+
+Creep names, overlord references, rooms, roles, operation identifiers, stack
+traces, and arbitrary metadata are JSON fields, never labels. This avoids
+unbounded Loki stream cardinality while keeping those values searchable.
+
+Legacy plain-text lines are wrapped as schema-v1 events with
+`logger="legacy"`, `data.legacy=true`, and the original value in
+`data.raw_line`. Malformed JSON also sets `data.parse_error=true`. Websocket
+payload errors become one `source="screeps_agent"` error event rather than a
+second raw-text entry. These fallbacks preserve one Loki entry per incoming
+line during rollout.
+
+Useful LogQL queries:
+
+```logql
+{source="screeps_console", server_host="screeps.felixbreuer.me", shard="coolify"} | json | level="error"
+```
+
+```logql
+{source="screeps_console", server_host="screeps.felixbreuer.me", shard="coolify"} | json | context_overlord="W1N1>source0"
+```
+
+```logql
+{source="screeps_console", server_host="screeps.felixbreuer.me", shard="coolify"} | json | context_creep="worker-42" | context_room="W1N1"
+```
+
 ## Deployment model
 
 Run one agent instance per world.
