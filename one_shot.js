@@ -8,16 +8,16 @@ const { extractMetrics, pushToVictoriaMetrics } = require("./ingest_segment");
 const { getScreepsConfig } = require("./config");
 const fs = require("fs").promises;
 
-async function processShards(shards) {
-  console.log("Starting data collection for shards:", shards.join(", "));
+async function processShards(shards, logger = console) {
+  logger.info("Starting data collection for shards:", shards.join(", "));
 
   let totalMetrics = 0;
 
   for (const shard of shards) {
-    console.log(`\nProcessing ${shard}...`);
+    logger.info(`\nProcessing ${shard}...`);
 
     const apiResponse = await fetchSegments(shard);
-    console.log(
+    logger.info(
       `Fetched ${Object.keys(apiResponse.data || {}).length} segments`,
     );
 
@@ -25,21 +25,21 @@ async function processShards(shards) {
     const nonEmptySegments = Object.values(segments).filter(
       (s) => s !== null,
     ).length;
-    console.log(`Parsed ${nonEmptySegments} non-empty segments`);
+    logger.info(`Parsed ${nonEmptySegments} non-empty segments`);
 
     for (const [segmentId, segmentData] of Object.entries(segments)) {
       if (segmentData) {
         const metrics = extractMetrics(segmentData, shard);
         if (metrics.length > 0) {
-          console.log(`Segment ${segmentId}: ${metrics.length} metrics`);
-          await pushToVictoriaMetrics(metrics);
+          logger.info(`Segment ${segmentId}: ${metrics.length} metrics`);
+          await pushToVictoriaMetrics(metrics, logger);
           totalMetrics += metrics.length;
         }
       }
     }
   }
 
-  console.log(`\n✓ Completed! Total metrics ingested: ${totalMetrics}`);
+  logger.info(`\n✓ Completed! Total metrics ingested: ${totalMetrics}`);
 }
 
 async function main() {
