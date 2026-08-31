@@ -54,18 +54,29 @@ function getLokiConfig(env = process.env) {
   };
 }
 
-function buildMemorySegmentUrl(baseUrl, shard) {
+function buildScreepsUrl(baseUrl, shard, path) {
   const normalizedBaseUrl = normalizeBaseUrl(baseUrl);
-  const useSeasonApi =
+  const useSeasonPath =
     normalizedBaseUrl === DEFAULT_BASE_URL && shard === "shardSeason";
+  const prefix = useSeasonPath ? "/season" : "";
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  return `${normalizedBaseUrl}${prefix}${normalizedPath}`;
+}
 
-  return `${normalizedBaseUrl}/${useSeasonApi ? "season/" : ""}api/user/memory-segment`;
+function buildSeasonApiUrl(baseUrl, shard, resourcePath) {
+  return buildScreepsUrl(baseUrl, shard, `/api/${resourcePath.replace(/^\/+/, "")}`);
+}
+
+function buildMemorySegmentUrl(baseUrl, shard) {
+  return buildSeasonApiUrl(baseUrl, shard, "user/memory-segment");
 }
 
 module.exports = {
   DEFAULT_BASE_URL,
   DEFAULT_SHARDS,
   buildMemorySegmentUrl,
+  buildScreepsUrl,
+  buildSeasonApiUrl,
   getDefaultShard,
   getLokiConfig,
   getScreepsConfig,

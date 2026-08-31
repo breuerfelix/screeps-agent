@@ -1,0 +1,22 @@
+version: "3.8"
+
+services:
+  screeps-agent-season-11:
+    image: ${SCREEPS_AGENT_IMAGE:-ghcr.io/breuerfelix/screeps-agent:main}
+    container_name: ${SCREEPS_AGENT_CONTAINER_NAME:-screeps-agent-season-11}
+    restart: unless-stopped
+    environment:
+      SCREEPS_TOKEN: ${SCREEPS_SEASON11_TOKEN:?set SCREEPS_SEASON11_TOKEN in the stack environment}
+      SCREEPS_BASE_URL: https://screeps.com
+      SCREEPS_SHARDS: shardSeason
+      VICTORIA_METRICS_URL: ${VICTORIA_METRICS_URL:-http://victoriametrics:8428}
+      LOKI_URL: ${LOKI_URL:-http://loki:3100}
+      NODE_ENV: ${NODE_ENV:-production}
+      TEST_MODE: ${TEST_MODE:-false}
+    networks:
+      - monitoring
+
+networks:
+  monitoring:
+    external: true
+    name: ${MONITORING_NETWORK:-monitoring_monitoring}

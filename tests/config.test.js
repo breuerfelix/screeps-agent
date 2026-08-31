@@ -15,7 +15,8 @@ function resetEnv() {
 test("uses backward-compatible defaults for official deployment", () => {
   resetEnv();
 
-  const { getScreepsConfig, buildMemorySegmentUrl } = loadConfig();
+  const { getScreepsConfig, buildMemorySegmentUrl, buildScreepsUrl } =
+    loadConfig();
   const config = getScreepsConfig();
 
   assert.equal(config.baseUrl, "https://screeps.com");
@@ -27,6 +28,10 @@ test("uses backward-compatible defaults for official deployment", () => {
   assert.equal(
     buildMemorySegmentUrl(config.baseUrl, "shardX"),
     "https://screeps.com/api/user/memory-segment",
+  );
+  assert.equal(
+    buildScreepsUrl(config.baseUrl, "shardSeason", "/socket/1/session/websocket"),
+    "https://screeps.com/season/socket/1/session/websocket",
   );
 });
 

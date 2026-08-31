@@ -3,6 +3,7 @@
 const axios = require("axios");
 const { URL } = require("node:url");
 const {
+  buildScreepsUrl,
   getDefaultShard,
   getLokiConfig,
   getScreepsConfig,
@@ -23,8 +24,14 @@ function randomSessionId() {
   return value;
 }
 
-function buildSocketUrl(baseUrl, serverId = Math.floor(Math.random() * 1000)) {
-  const wsBase = baseUrl.replace(/^http/, "ws").replace(/\/+$/, "");
+function buildSocketUrl(
+  baseUrl,
+  serverId = Math.floor(Math.random() * 1000),
+  shard,
+) {
+  const wsBase = buildScreepsUrl(baseUrl, shard, "")
+    .replace(/^http/, "ws")
+    .replace(/\/$/, "");
   return `${wsBase}/socket/${serverId}/${randomSessionId()}/websocket`;
 }
 
@@ -109,13 +116,16 @@ function buildConsoleLogEntries(payload, options = {}) {
   return entries;
 }
 
-async function fetchUserIdentity(baseUrl, token) {
-  const response = await axios.get(`${baseUrl}/api/auth/me`, {
-    headers: {
-      "X-Token": token,
-      "X-Username": token,
+async function fetchUserIdentity(baseUrl, token, shard) {
+  const response = await axios.get(
+    buildScreepsUrl(baseUrl, shard, "/api/auth/me"),
+    {
+      headers: {
+        "X-Token": token,
+        "X-Username": token,
+      },
     },
-  });
+  );
 
   return {
     userId: response.data._id,
@@ -123,9 +133,9 @@ async function fetchUserIdentity(baseUrl, token) {
   };
 }
 
-async function postConsoleExpression(baseUrl, token, expression) {
+async function postConsoleExpression(baseUrl, token, expression, shard) {
   const response = await axios.post(
-    `${baseUrl}/api/user/console`,
+    buildScreepsUrl(baseUrl, shard, "/api/user/console"),
     { expression },
     {
       headers: {
@@ -166,13 +176,13 @@ async function probeConsoleLogCapture({
   logger = console,
   timeoutMs = DEFAULT_PROBE_TIMEOUT_MS,
 }) {
-  const user = await fetchUserIdentity(baseUrl, token);
   const defaultShard = getDefaultShard(shards);
+  const user = await fetchUserIdentity(baseUrl, token, defaultShard);
   const consoleChannel = buildConsoleChannel(user.userId);
   const probeId = `hermes-ws-probe-${Date.now()}`;
   const resultId = `hermes-ws-result-${Date.now()}`;
   const expression = `console.log(\"${probeId}\"); \"${resultId}\"`;
-  const wsUrl = buildSocketUrl(baseUrl);
+  const wsUrl = buildSocketUrl(baseUrl, undefined, defaultShard);
 
   return await new Promise((resolve, reject) => {
     const socket = new WebSocket(wsUrl);
@@ -233,6 +243,7 @@ async function probeConsoleLogCapture({
             baseUrl,
             token,
             expression,
+            defaultShard,
           );
           continue;
         }
@@ -293,7 +304,9 @@ function connectConsoleStreamSession({
   signal,
 }) {
   return new Promise((resolve, reject) => {
-    const socket = new WebSocket(buildSocketUrl(baseUrl));
+    const socket = new WebSocket(
+      buildSocketUrl(baseUrl, undefined, defaultShard),
+    );
     let settled = false;
 
     function settle(error) {
@@ -394,9 +407,9 @@ async function startConsoleLogStreaming({ logger = console, signal } = {}) {
     return;
   }
 
-  const user = await fetchUserIdentity(baseUrl, token);
-  const consoleChannel = buildConsoleChannel(user.userId);
   const defaultShard = getDefaultShard(shards);
+  const user = await fetchUserIdentity(baseUrl, token, defaultShard);
+  const consoleChannel = buildConsoleChannel(user.userId);
   const baseLabels = buildBaseLogLabels(baseUrl, user.username);
 
   logger.info(

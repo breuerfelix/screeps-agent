@@ -33,6 +33,15 @@ test("builds websocket url from Screeps base URL", () => {
   );
 });
 
+test("builds websocket url from the official Season 11 endpoint", () => {
+  const url = buildSocketUrl("https://screeps.com", 147, "shardSeason");
+
+  assert.match(
+    url,
+    /^wss:\/\/screeps\.com\/season\/socket\/147\/[a-z0-5]{8}\/websocket$/,
+  );
+});
+
 test("creates Loki-ready console log entries with shard fallback", () => {
   const entries = buildConsoleLogEntries(
     {
