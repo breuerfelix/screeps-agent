@@ -87,6 +87,12 @@ Examples:
 
 Do not configure one instance to scrape both official and private worlds at once. Deploy a separate instance for the private server.
 
+### Season 11 stack
+
+For the official Season 11 world, use [`docker-compose.season-11.yml`](docker-compose.season-11.yml) with the existing external monitoring network. It pins the agent to `shardSeason`, sends metrics to VictoriaMetrics, and sends console websocket logs to Loki. See [`docs/season-11-observability.md`](docs/season-11-observability.md) for the required secret and Grafana/Loki queries.
+
+The Season 11 stack is intentionally a separate agent instance. If the existing official-world deployment still scrapes `shardSeason`, remove that shard there before starting the Season 11 instance to avoid duplicate metric ingestion.
+
 The agent normalizes both Screeps response shapes seen in the wild:
 
 - official MMO responses where `/api/user/memory-segment` returns `data` as an array of segment strings
