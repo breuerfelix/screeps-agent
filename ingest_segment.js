@@ -243,7 +243,7 @@ function extractMetrics(segmentData, shard) {
   return metrics;
 }
 
-async function pushToVictoriaMetrics(metrics) {
+async function pushToVictoriaMetrics(metrics, logger = console) {
   const url = `${VICTORIA_METRICS_URL}/api/v1/import`;
 
   // Convert to VictoriaMetrics import format (needs values array)
@@ -257,9 +257,9 @@ async function pushToVictoriaMetrics(metrics) {
 
   const data = lines.join("\n");
 
-  console.log("Sample lines being sent:");
-  console.log(lines.slice(0, 3).join("\n"));
-  console.log("...");
+  logger.info("Sample lines being sent:");
+  logger.info(lines.slice(0, 3).join("\n"));
+  logger.info("...");
 
   const response = await axios.post(url, data, {
     headers: {

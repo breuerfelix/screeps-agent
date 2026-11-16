@@ -23,7 +23,7 @@ class ScreepsAgent {
     this.log.info(
       `Starting data collection cycle for shards ${shards.join(", ")} via ${baseUrl}...`,
     );
-    await processShards(shards);
+    await processShards(shards, this.log);
     this.log.info("Data collection cycle completed successfully");
   }
 
@@ -78,16 +78,16 @@ function main() {
   const agent = new ScreepsAgent();
 
   if (process.env.TEST_MODE?.toLowerCase() === "true") {
-    console.log("Running in test mode - single collection cycle");
+    agent.log.info("Running in test mode - single collection cycle");
     agent
       .processAllShards()
       .then(() => process.exit(0))
       .catch((error) => {
-        console.error(`Test mode failed: ${error.message}`);
+        agent.log.error(`Test mode failed: ${error.message}`);
         process.exit(1);
       });
   } else {
-    console.log("Running in production mode - continuous collection");
+    agent.log.info("Running in production mode - continuous collection");
     agent.start();
   }
 }
