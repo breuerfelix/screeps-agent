@@ -77,6 +77,8 @@ Probe the websocket console path against the configured Screeps target:
 npm run probe:console
 ```
 
+On `screeps.com`, set `SCREEPS_SHARDS` to one active shard, for example `SCREEPS_SHARDS=shardX npm run probe:console`.
+
 If `LOKI_URL` is set, the probe also pushes the captured console event into Loki so you can verify end-to-end ingestion.
 
 Run tests:

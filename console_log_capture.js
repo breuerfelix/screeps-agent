@@ -10,7 +10,7 @@ const {
 const { pushLogsToLoki, toTimestampNs } = require("./loki");
 
 const DEFAULT_PROBE_TIMEOUT_MS = 30000;
-const DEFAULT_RECONNECT_DELAY_MS = 5000;
+const IDENTITY_TIMEOUT_MS = 10000;
 
 function randomSessionId() {
   const alphabet = "abcdefghijklmnopqrstuvwxyz012345";
@@ -115,6 +115,7 @@ async function fetchUserIdentity(baseUrl, token) {
       "X-Token": token,
       "X-Username": token,
     },
+    timeout: IDENTITY_TIMEOUT_MS,
   });
 
   return {
@@ -123,10 +124,10 @@ async function fetchUserIdentity(baseUrl, token) {
   };
 }
 
-async function postConsoleExpression(baseUrl, token, expression) {
+async function postConsoleExpression(baseUrl, token, expression, shard) {
   const response = await axios.post(
     `${baseUrl}/api/user/console`,
-    { expression },
+    { expression, shard },
     {
       headers: {
         "X-Token": token,
@@ -138,27 +139,6 @@ async function postConsoleExpression(baseUrl, token, expression) {
   return response.data;
 }
 
-function delay(ms, signal) {
-  return new Promise((resolve, reject) => {
-    const timeout = setTimeout(() => {
-      cleanup();
-      resolve();
-    }, ms);
-
-    function onAbort() {
-      cleanup();
-      reject(new Error("Aborted"));
-    }
-
-    function cleanup() {
-      clearTimeout(timeout);
-      signal?.removeEventListener("abort", onAbort);
-    }
-
-    signal?.addEventListener("abort", onAbort, { once: true });
-  });
-}
-
 async function probeConsoleLogCapture({
   baseUrl,
   token,
@@ -166,6 +146,7 @@ async function probeConsoleLogCapture({
   logger = console,
   timeoutMs = DEFAULT_PROBE_TIMEOUT_MS,
 }) {
+  logger.info("Connecting to the Screeps console WebSocket...");
   const user = await fetchUserIdentity(baseUrl, token);
   const defaultShard = getDefaultShard(shards);
   const consoleChannel = buildConsoleChannel(user.userId);
@@ -213,10 +194,12 @@ async function probeConsoleLogCapture({
       finish(new Error("Screeps console websocket connection failed"));
     });
 
+    socket.addEventListener("close", () => {
+      finish(new Error("Screeps console websocket closed before the probe completed"));
+    });
+
     socket.addEventListener("message", (event) => {
-      Promise.resolve(handleMessage(String(event.data))).catch((error) => {
-        finish(error);
-      });
+      handleMessage(String(event.data)).catch(finish);
     });
 
     async function handleMessage(rawFrame) {
@@ -229,11 +212,19 @@ async function probeConsoleLogCapture({
 
         if (message.startsWith("auth ok")) {
           socket.send(wrapSockJsMessage(`subscribe ${consoleChannel}`));
+          logger.info("WebSocket authenticated. Sending test console line...");
           consoleCommandResponse = await postConsoleExpression(
             baseUrl,
             token,
             expression,
+            defaultShard ?? undefined,
           );
+          if (consoleCommandResponse?.error === "invalid shard") {
+            throw new Error("Screeps rejected the console shard. Set SCREEPS_SHARDS to one active shard.");
+          }
+          if (consoleCommandResponse?.error) {
+            throw new Error("Screeps rejected the test console command");
+          }
           continue;
         }
 
@@ -290,54 +281,24 @@ function connectConsoleStreamSession({
   baseLabels,
   defaultShard,
   logger,
-  signal,
 }) {
-  return new Promise((resolve, reject) => {
+  return new Promise((_resolve, reject) => {
     const socket = new WebSocket(buildSocketUrl(baseUrl));
-    let settled = false;
-
-    function settle(error) {
-      if (settled) {
-        return;
-      }
-
-      settled = true;
-      signal?.removeEventListener("abort", abortHandler);
-
-      if (error) {
-        reject(error);
-        return;
-      }
-
-      resolve();
-    }
-
-    function abortHandler() {
-      try {
-        socket.close();
-      } finally {
-        settle();
-      }
-    }
-
-    signal?.addEventListener("abort", abortHandler, { once: true });
 
     socket.addEventListener("open", () => {
       socket.send(wrapSockJsMessage(`auth ${token}`));
     });
 
     socket.addEventListener("error", () => {
-      settle(new Error("Screeps console websocket connection failed"));
+      reject(new Error("Screeps console websocket connection failed"));
     });
 
     socket.addEventListener("close", () => {
-      settle();
+      reject(new Error("Screeps console websocket closed"));
     });
 
     socket.addEventListener("message", (event) => {
-      Promise.resolve(handleMessage(String(event.data))).catch((error) => {
-        settle(error);
-      });
+      handleMessage(String(event.data)).catch(reject);
     });
 
     async function handleMessage(rawFrame) {
@@ -385,7 +346,7 @@ function connectConsoleStreamSession({
   });
 }
 
-async function startConsoleLogStreaming({ logger = console, signal } = {}) {
+async function startConsoleLogStreaming({ logger = console } = {}) {
   const { baseUrl, shards, token } = getScreepsConfig();
   const { enabled, url: lokiUrl } = getLokiConfig();
 
@@ -403,40 +364,15 @@ async function startConsoleLogStreaming({ logger = console, signal } = {}) {
     `Starting Screeps websocket log capture for ${user.username} via ${baseUrl}`,
   );
 
-  while (!signal?.aborted) {
-    try {
-      await connectConsoleStreamSession({
-        baseUrl,
-        token,
-        lokiUrl,
-        consoleChannel,
-        baseLabels,
-        defaultShard,
-        logger,
-        signal,
-      });
-    } catch (error) {
-      if (signal?.aborted) {
-        break;
-      }
-
-      logger.error(`Console websocket stream failed: ${error.message}`);
-    }
-
-    if (signal?.aborted) {
-      break;
-    }
-
-    logger.warn(
-      `Reconnecting Screeps console websocket in ${DEFAULT_RECONNECT_DELAY_MS / 1000}s`,
-    );
-
-    try {
-      await delay(DEFAULT_RECONNECT_DELAY_MS, signal);
-    } catch {
-      break;
-    }
-  }
+  await connectConsoleStreamSession({
+    baseUrl,
+    token,
+    lokiUrl,
+    consoleChannel,
+    baseLabels,
+    defaultShard,
+    logger,
+  });
 }
 
 module.exports = {

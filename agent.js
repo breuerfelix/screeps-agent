@@ -9,7 +9,6 @@ const { getScreepsConfig } = require("./config");
 
 class ScreepsAgent {
   constructor() {
-    this.shutdownController = new AbortController();
     this.log = {
       info: (msg) => console.log(`[${new Date().toISOString()}] INFO: ${msg}`),
       warn: (msg) => console.log(`[${new Date().toISOString()}] WARN: ${msg}`),
@@ -28,23 +27,14 @@ class ScreepsAgent {
   }
 
   startConsoleLogs() {
-    startConsoleLogStreaming({
-      logger: this.log,
-      signal: this.shutdownController.signal,
-    }).catch((error) => {
-      if (!this.shutdownController.signal.aborted) {
-        this.log.error(`Console websocket streamer exited: ${error.message}`);
-      }
+    return startConsoleLogStreaming({ logger: this.log }).catch(() => {
+      this.log.error("Console websocket streamer exited");
+      process.exit(1);
     });
   }
 
   shutdown() {
-    if (this.shutdownController.signal.aborted) {
-      return;
-    }
-
     this.log.info("Shutting down gracefully...");
-    this.shutdownController.abort();
     process.exit(0);
   }
 

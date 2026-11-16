@@ -2,6 +2,7 @@
 
 require("dotenv").config({ quiet: true });
 
+const { isAxiosError } = require("axios");
 const { getLokiConfig, getScreepsConfig } = require("./config");
 const { probeConsoleLogCapture } = require("./console_log_capture");
 const { pushLogsToLoki } = require("./loki");
@@ -14,6 +15,7 @@ async function main() {
     baseUrl: screepsConfig.baseUrl,
     token: screepsConfig.token,
     shards: screepsConfig.shards,
+    logger: { info: console.error },
   });
 
   let lokiPushSucceeded = false;
@@ -40,6 +42,6 @@ async function main() {
 }
 
 main().catch((error) => {
-  console.error(error.message);
+  console.error(isAxiosError(error) ? "Screeps console probe HTTP request failed" : error.message);
   process.exit(1);
 });
