@@ -15,11 +15,6 @@ This Node.js agent fetches Screeps memory segments and pushes metrics to Victori
 - Supports env-configured Screeps targets via `SCREEPS_BASE_URL` and `SCREEPS_SHARDS`
 - Keeps metrics labeled by `shard` only; console logs also carry `server_host` for cross-environment separation
 
-Backward-compatible defaults remain for the current official-world deployment:
-
-- `SCREEPS_BASE_URL=https://screeps.com`
-- `SCREEPS_SHARDS=shardSeason,shardX`
-
 ## Published container image
 
 This repository publishes images to:
@@ -42,156 +37,28 @@ docker pull ghcr.io/breuerfelix/screeps-agent:sha-<full-git-sha>
 
 The GitHub Actions workflow logs in with `GITHUB_TOKEN` and pushes to the package namespace that matches this repository.
 
-## Configuration
+## Deployment
 
-Copy `.env.example` to `.env` and edit values for the deployment you want.
+Run one container from `ghcr.io/breuerfelix/screeps-agent:main` per Screeps world. The agent makes outbound connections to Screeps, VictoriaMetrics, and optionally Loki. It requires no inbound ports or persistent storage.
 
-```bash
-cp .env.example .env
-```
+For a private image, configure your deployment environment to authenticate to GHCR with `read:packages` access before pulling.
 
-### Environment variables
+### Agent environment variables
 
-- `SCREEPS_TOKEN` — API token for the target world
-  - official world: create at https://screeps.com/a/#!/account/auth-tokens
-  - private server: use a token minted for that private server user
-- `SCREEPS_BASE_URL` — base URL for the target Screeps deployment
-  - official world example: `https://screeps.com`
-  - private server example: `https://screeps.example.internal`
-- `SCREEPS_SHARDS` — comma-separated shard names for this deployment
-  - official world example: `shardSeason,shardX`
-  - private server example: `coolify`
-- `VICTORIA_METRICS_URL` — VictoriaMetrics base URL
-- `LOKI_URL` — Loki base URL for console log ingestion
-  - local compose example: `http://loki:3100`
-  - external host example: `http://loki.example.internal:3100`
-  - when unset, websocket console capture stays disabled and the agent still exports metrics only
-- `SCREEPS_AGENT_IMAGE` — GHCR image tag to deploy, default `ghcr.io/breuerfelix/screeps-agent:main`
-- `NODE_ENV` — usually `production`
-- `TEST_MODE` — set to `true` for a single collection cycle
-
-When the console websocket payload omits `shard`, the agent falls back to the single configured value from `SCREEPS_SHARDS`. This matters for many private-server deployments where websocket console events do not include shard data even though the deployment is single-shard.
-
-## Deployment model
-
-Run one agent instance per world.
-
-Examples:
-
-- official-world deployment
-  - `SCREEPS_BASE_URL=https://screeps.com`
-  - `SCREEPS_SHARDS=shardSeason,shardX`
-- private-server deployment
-  - `SCREEPS_BASE_URL=https://screeps.example.internal`
-  - `SCREEPS_SHARDS=coolify`
-
-Do not configure one instance to scrape both official and private worlds at once. Deploy a separate instance for the private server.
-
-The agent normalizes both Screeps response shapes seen in the wild:
-
-- official MMO responses where `/api/user/memory-segment` returns `data` as an array of segment strings
-- private-server responses where the same endpoint returns `data` as one JSON string payload even when multiple segment IDs are requested
-
-## Consuming the published image
-
-### Docker Compose
-
-1. Copy the example env file:
-
-```bash
-cp .env.example .env
-```
-
-2. Edit `.env` with the target world for this deployment.
-
-Official-world example:
-
-```env
-SCREEPS_TOKEN=replace-with-official-token
-SCREEPS_BASE_URL=https://screeps.com
-SCREEPS_SHARDS=shardSeason,shardX
-VICTORIA_METRICS_URL=http://victoriametrics:8428
-LOKI_URL=http://loki:3100
-SCREEPS_AGENT_IMAGE=ghcr.io/breuerfelix/screeps-agent:main
-NODE_ENV=production
-TEST_MODE=false
-```
-
-Private-server example:
-
-```env
-SCREEPS_TOKEN=replace-with-private-server-token
-SCREEPS_BASE_URL=https://screeps.example.internal
-SCREEPS_SHARDS=coolify
-VICTORIA_METRICS_URL=http://victoriametrics:8428
-LOKI_URL=http://loki:3100
-SCREEPS_AGENT_IMAGE=ghcr.io/breuerfelix/screeps-agent:main
-NODE_ENV=production
-TEST_MODE=false
-```
-
-3. Start the stack:
-
-```bash
-docker compose up -d
-```
-
-The included `docker-compose.yml` consumes the published GHCR image by default and passes the `.env` values through to the agent container.
-
-### Portainer GitOps deployment for the official world
-
-Use `docker-compose.portainer.yml` as the stack file when the official-world scraper is managed by Portainer from this repository.
-
-What this file does:
-
-- runs only the `screeps-agent` service, matching the existing standalone deployment shape
-- uses `ghcr.io/breuerfelix/screeps-agent:main` by default so Portainer follows the repository's main image line
-- keeps the same environment variable names already used by the container (`SCREEPS_TOKEN`, `VICTORIA_METRICS_URL`, `LOKI_URL`, `NODE_ENV`)
-- preserves official-world defaults when `SCREEPS_BASE_URL` and `SCREEPS_SHARDS` are not overridden
-- joins the existing `monitoring_monitoring` Docker network by default instead of creating a new monitoring stack
-- does not require bind mounts or a generated `config.js` startup workaround
-
-Recommended Portainer environment values:
-
-```env
-SCREEPS_TOKEN=replace-with-official-token
-VICTORIA_METRICS_URL=http://victoriametrics:8428
-NODE_ENV=production
-TEST_MODE=false
-```
-
-Optional overrides:
-
-```env
-SCREEPS_BASE_URL=https://screeps.com
-SCREEPS_SHARDS=shardSeason,shardX
-LOKI_URL=
-SCREEPS_AGENT_IMAGE=ghcr.io/breuerfelix/screeps-agent:main
-MONITORING_NETWORK=monitoring_monitoring
-SCREEPS_AGENT_CONTAINER_NAME=screeps-agent
-```
-
-By default Portainer follows `ghcr.io/breuerfelix/screeps-agent:main`. Override `SCREEPS_AGENT_IMAGE` only when you intentionally need a different tag. Set `LOKI_URL` for private-world deployments that should stream websocket console logs into Loki; leave it empty for metrics-only official-world deployments.
-
-### Downstream deployments outside this repository
-
-If the package remains private, the deployment environment must authenticate to GHCR before pulling:
-
-```bash
-echo "$GHCR_TOKEN" | docker login ghcr.io -u <github-user> --password-stdin
-docker pull ghcr.io/breuerfelix/screeps-agent:main
-```
-
-Typical token scopes:
-
-- `read:packages` to pull from GHCR
-- `write:packages` only for publishing environments
-
-For GitHub-hosted workflows in the same repository, the built-in `GITHUB_TOKEN` is enough for publishing.
+| Variable | Value |
+| --- | --- |
+| `SCREEPS_TOKEN` | API token issued by the target Screeps server. |
+| `SCREEPS_BASE_URL` | Screeps base URL. Defaults to `https://screeps.com`. Set it to your server URL for a private world. |
+| `SCREEPS_SHARDS` | Comma-separated shard names. Defaults to `shardSeason,shardX`. Set it to the shard names used by your private server. |
+| `VICTORIA_METRICS_URL` | VictoriaMetrics base URL reachable from the agent. |
+| `LOKI_URL` | Optional Loki base URL reachable from the agent. Set it to enable console log ingestion. |
+| `TEST_MODE` | Set to `true` to collect metrics once and exit. Defaults to continuous operation. |
 
 ## Local development
 
 Node.js 22.4.0 or newer is required. The websocket console capture path uses the built-in `WebSocket` client, which is only stable from Node 22.4.0 onward.
+
+Set the agent environment variables in your shell or `.env` before starting Node.js. For a host-side run against the bundled monitoring services, use `http://localhost:8428` for VictoriaMetrics and `http://localhost:3100` for Loki.
 
 ```bash
 npm ci
@@ -237,19 +104,25 @@ node --check segment_parser.js
 docker build -t screeps-agent:dev .
 ```
 
-## Monitoring stack
+## Local monitoring stack
 
-The repository also includes a local monitoring stack for development:
+The bundled `docker-compose.yml` runs the agent with Grafana, VictoriaMetrics, and Loki for local development. Copy `.env.example` to `.env`, replace `SCREEPS_TOKEN`, and adjust the Screeps settings for your world. The example endpoints use the bundled services. Set `SCREEPS_AGENT_IMAGE` in `.env` to override the image used by Compose.
 
-- Grafana on `http://localhost:3000`
-- VictoriaMetrics on `http://localhost:8428`
-- Loki on `http://localhost:3100`
+```bash
+cp .env.example .env
+```
 
-Start it with:
+After editing `.env`, start the stack.
 
 ```bash
 docker compose up -d
 ```
+
+The monitoring services are available locally.
+
+- Grafana on `http://localhost:3000`
+- VictoriaMetrics on `http://localhost:8428`
+- Loki on `http://localhost:3100`
 
 Default Grafana credentials in the sample compose file:
 
@@ -260,6 +133,7 @@ Default Grafana credentials in the sample compose file:
 
 - The official Screeps season endpoint still uses `https://screeps.com/season/api/...` when the base URL is official and shard is `shardSeason`.
 - All other targets, including private servers, use `<SCREEPS_BASE_URL>/api/...`.
+- The agent accepts both an array of memory segment strings and the single JSON string returned by some private servers.
 - Metrics remain distinguished by shard name only.
 - Console logs sent to Loki use labels `{source="screeps_console", server_host="...", username="...", shard="...", message_type="log|result|error"}`.
 - For single-shard private deployments, console events that omit `payload.shard` inherit the single configured `SCREEPS_SHARDS` value so Loki streams still remain shard-addressable.
