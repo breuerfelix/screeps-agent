@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 const axios = require("axios");
+const { compile } = require("html-to-text");
 const { URL } = require("node:url");
 const {
   getDefaultShard,
@@ -11,6 +12,11 @@ const { pushLogsToLoki, toTimestampNs } = require("./loki");
 
 const DEFAULT_PROBE_TIMEOUT_MS = 30000;
 const IDENTITY_TIMEOUT_MS = 10000;
+const toConsoleText = compile({
+  wordwrap: false,
+  whitespaceCharacters: "",
+  selectors: [{ selector: "a", options: { ignoreHref: true } }],
+});
 
 function randomSessionId() {
   const alphabet = "abcdefghijklmnopqrstuvwxyz012345";
@@ -85,7 +91,7 @@ function buildConsoleLogEntries(payload, options = {}) {
   for (const line of payload?.messages?.log || []) {
     entries.push({
       labels: { ...labels, message_type: "log" },
-      line: String(line),
+      line: toConsoleText(String(line)),
       timestampNs,
     });
   }
@@ -93,7 +99,7 @@ function buildConsoleLogEntries(payload, options = {}) {
   for (const line of payload?.messages?.results || []) {
     entries.push({
       labels: { ...labels, message_type: "result" },
-      line: String(line),
+      line: toConsoleText(String(line)),
       timestampNs,
     });
   }
@@ -101,7 +107,7 @@ function buildConsoleLogEntries(payload, options = {}) {
   if (payload?.error) {
     entries.push({
       labels: { ...labels, message_type: "error" },
-      line: String(payload.error),
+      line: toConsoleText(String(payload.error)),
       timestampNs,
     });
   }

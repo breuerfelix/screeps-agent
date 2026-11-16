@@ -69,14 +69,14 @@ test("builds websocket url from Screeps base URL", () => {
   );
 });
 
-test("creates Loki-ready console log entries with shard fallback", () => {
+test("converts console messages to text and applies the shard fallback", () => {
   const entries = buildConsoleLogEntries(
     {
       messages: {
-        log: ["hello"],
-        results: ["world"],
+        log: ['<font color="green">hello</font>  &amp; goodbye'],
+        results: ['<a href="https://example.test/room">W1N1</a><br>[missing]'],
       },
-      error: "boom",
+      error: "<b>boom</b>\n    at tick (main:1:2)",
     },
     {
       baseLabels: {
@@ -100,7 +100,7 @@ test("creates Loki-ready console log entries with shard fallback", () => {
           shard: "coolify",
           message_type: "log",
         },
-        line: "hello",
+        line: "hello  & goodbye",
       },
       {
         labels: {
@@ -110,7 +110,7 @@ test("creates Loki-ready console log entries with shard fallback", () => {
           shard: "coolify",
           message_type: "result",
         },
-        line: "world",
+        line: "W1N1\n[missing]",
       },
       {
         labels: {
@@ -120,7 +120,7 @@ test("creates Loki-ready console log entries with shard fallback", () => {
           shard: "coolify",
           message_type: "error",
         },
-        line: "boom",
+        line: "boom\n    at tick (main:1:2)",
       },
     ],
   );
@@ -181,7 +181,7 @@ test("the probe submits the selected shard and reports a rejected command", { ti
   assert.equal(socket.close.mock.callCount(), 1);
 });
 
-test("forwards console logs to Loki and exits when the websocket closes", { timeout: 2000 }, async (t) => {
+test("forwards plain-text console logs to Loki and exits when the websocket closes", { timeout: 2000 }, async (t) => {
   const { agent, exit } = setupAgent(t);
   const get = t.mock.method(axios, "get", async () => ({
     data: { _id: "hermes-id", username: "hermes" },
@@ -213,8 +213,11 @@ test("forwards console logs to Loki and exits when the websocket closes", { time
     wrapSockJsMessage(`subscribe ${channel}`),
   ]);
 
-  const line = "console forwarding test";
-  const message = JSON.stringify([channel, { messages: { log: [line] } }]);
+  const lines = [
+    "console forwarding test",
+    '<font color="orange">Warning</font> <a href="https://example.test/room">W1N1</a>',
+  ];
+  const message = JSON.stringify([channel, { messages: { log: lines } }]);
   socket.dispatchEvent(new MessageEvent("message", {
     data: `a${wrapSockJsMessage(message)}`,
   }));
@@ -229,7 +232,10 @@ test("forwards console logs to Loki and exits when the websocket closes", { time
     shard: "coolify",
     message_type: "log",
   });
-  assert.equal(payload.streams[0].values[0][1], line);
+  assert.deepEqual(payload.streams[0].values.map(([, line]) => line), [
+    "console forwarding test",
+    "Warning W1N1",
+  ]);
 
   socket.dispatchEvent(new Event("close"));
   await stream;
