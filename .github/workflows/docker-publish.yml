@@ -50,7 +50,7 @@ jobs:
             org.opencontainers.image.description=Screeps monitoring agent that pushes metrics to VictoriaMetrics
 
       - name: Build and publish image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: ./Dockerfile
